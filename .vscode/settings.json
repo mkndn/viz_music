@@ -1,0 +1,8 @@
+{
+    "editor.fontFamily": "'cascadia code'",
+    "editor.formatOnSave": true,
+    "editor.letterSpacing": 0,
+    "editor.lineHeight": 30,
+    "editor.fontLigatures": true,
+    "editor.fontSize": 14,
+}
