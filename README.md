@@ -1,4 +1,4 @@
-# step_01
+# Viz Music
 
 A new Flutter project.
 

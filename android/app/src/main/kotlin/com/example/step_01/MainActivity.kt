@@ -1,4 +1,4 @@
-package com.example.step_01
+package com.mkdn.viz
 
 import io.flutter.embedding.android.FlutterActivity
 
