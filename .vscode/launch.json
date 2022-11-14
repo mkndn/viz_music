@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "myartist",
+            "name": "vizMusic",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug"
