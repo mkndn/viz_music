@@ -1,12 +1,16 @@
+import 'dart:convert';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:myartist/src/shared/classes/classes.dart';
 import 'package:myartist/src/shared/classes/media_content.dart';
 import 'package:myartist/src/shared/enums/hive_box.dart';
+import 'package:myartist/src/shared/extensions.dart';
+import 'package:myartist/src/shared/models/album.dart';
+import 'package:myartist/src/shared/models/artist.dart';
+import 'package:myartist/src/shared/models/song.dart';
 import 'package:myartist/src/shared/providers/preferences.dart';
 import 'package:myartist/src/shared/services/disk_media_store_manager.dart';
 
@@ -30,23 +34,25 @@ class InMemoryMediaManagerState extends State<InMemoryMediaManager> {
   MediaContent content = MediaContent();
   final DiskMediaStoreManager _diskMediaManager =
       DiskMediaStoreManager.instance();
+  final Preferences _prefs = Preferences();
+
+  List<FileSystemEntity> getEntities(String path) => Directory(path)
+      .listSync()
+      .where((element) => element.path.endsWith(".mp3"))
+      .toList();
 
   Future<void> _reload() async {
-    final Preferences _prefs = Preferences();
-
     await _prefs.getStringList('Folders.included').then((paths) async {
       final List<Future<MediaContent>> mediaContentFutureList =
           List.empty(growable: true);
       for (var element in paths) {
         List<Future<Metadata>> songMetadataList = List.empty(growable: true);
-        List<FileSystemEntity> entities = Directory(element)
-            .listSync()
-            .where((element) => element.path.endsWith(".mp3"))
-            .toList();
+        List<FileSystemEntity> entities = getEntities(element);
         for (var element in entities) {
           songMetadataList.add(MetadataRetriever.fromFile(File(element.path)));
         }
         if (songMetadataList.isNotEmpty) {
+          _prefs.setBool(element, true);
           mediaContentFutureList
               .add(_diskMediaManager.generate(songMetadataList));
         }
@@ -55,6 +61,44 @@ class InMemoryMediaManagerState extends State<InMemoryMediaManager> {
       await Future.wait(mediaContentFutureList).then((mediaContentList) async {
         update(mediaContentList.last);
       });
+    });
+  }
+
+  Future<bool> isFolderIntact() async {
+    List<String> paths = await _prefs.getStringList('Folders.included');
+    return paths
+        .map((e) => Folder.fromJson(jsonDecode(e)))
+        .where((element) => element.hasContent)
+        .where((element) => getEntities(element.path).length > 0)
+        .isNotEmpty;
+  }
+
+  Future<void> init() async {
+    bool folderIntact = await isFolderIntact();
+    if (folderIntact) {
+      MediaContent content = _diskMediaManager.loadData();
+      if (content.hasContent) {
+        update(content);
+      } else {
+        await _reload();
+      }
+    }
+  }
+
+  Future<void> refresh() async {
+    reset();
+    await _reload();
+  }
+
+  Future<void> reset() async {
+    await _diskMediaManager.resetAll();
+    await _prefs.reset();
+    update(MediaContent());
+  }
+
+  void update(MediaContent mediaContent) {
+    setState(() {
+      this.content = mediaContent;
     });
   }
 
@@ -96,31 +140,6 @@ class InMemoryMediaManagerState extends State<InMemoryMediaManager> {
       _diskMediaManager.updateArtist(matched);
       content.artists.setAll(matchedIndex, [matched]);
     }
-  }
-
-  Future<void> init() async {
-    MediaContent content = _diskMediaManager.loadData();
-    if (content.hasContent) {
-      update(content);
-    } else {
-      await _reload();
-    }
-  }
-
-  Future<void> refresh() async {
-    reset();
-    await _reload();
-  }
-
-  Future<void> reset() async {
-    _diskMediaManager.resetAll();
-    update(MediaContent());
-  }
-
-  void update(MediaContent mediaContent) {
-    setState(() {
-      this.content = mediaContent;
-    });
   }
 
   @override

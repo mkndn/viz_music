@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/classes/song.dart';
+import 'package:myartist/src/shared/models/song.dart';
 import 'package:myartist/src/shared/enums/display_type.dart';
 import 'package:myartist/src/shared/enums/sort_mode.dart';
 import 'package:myartist/src/shared/enums/sorting.dart';

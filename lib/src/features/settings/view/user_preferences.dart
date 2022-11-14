@@ -20,79 +20,65 @@ class _UserPreferencesState extends State<UserPreferences> {
     final bloc = BlocProvider.of<SplashScreenBloc>(context);
     final InMemoryMediaManagerState state = InMemoryMediaManager.of(context);
     return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        primary: false,
-        appBar: AppBar(
-          title: const Text('SETTINGS'),
-          toolbarHeight: kToolbarHeight * 2,
-        ),
-        body: SingleChildScrollView(
-          child: AdaptiveColumn(
-            children: [
-              AdaptiveContainer(
-                columnSpan: 12,
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: Clickable(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text('Include/Exclude Folders'),
-                        SizedBox(
-                          width: 50,
-                        ),
-                        Icon(Icons.arrow_right)
-                      ],
+      return SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        padding: const EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: Clickable(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: const [
+                    Text('Include/Exclude Folders'),
+                    SizedBox(
+                      width: 50,
                     ),
-                    onTap: () => GoRouter.of(context).go('/settings/folders'),
-                  ),
+                    Icon(Icons.arrow_right)
+                  ],
                 ),
+                onTap: () => GoRouter.of(context).go('/settings/folders'),
               ),
-              AdaptiveContainer(
-                columnSpan: 12,
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: Row(
-                    children: [
-                      const Text('Rescan'),
-                      const SizedBox(
-                        width: 50,
-                      ),
-                      IconButton(
-                        onPressed: () async {
-                          bloc.add(const SplashScreenEvent.showSplashScreen());
-                          state.refresh().whenComplete(() => bloc.add(
-                              const SplashScreenEvent.naviagteToHomeScreen()));
-                        },
-                        icon: const RotatedBox(
-                          quarterTurns: 2,
-                          child: Icon(Icons.refresh_rounded),
-                        ),
-                      )
-                    ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: Row(
+                children: [
+                  const Text('Rescan'),
+                  const SizedBox(
+                    width: 50,
                   ),
-                ),
+                  IconButton(
+                    onPressed: () async {
+                      bloc.add(const SplashScreenEvent.showSplashScreen());
+                      state.refresh().whenComplete(() => bloc
+                          .add(const SplashScreenEvent.naviagteToHomeScreen()));
+                    },
+                    icon: const RotatedBox(
+                      quarterTurns: 2,
+                      child: Icon(Icons.refresh_rounded),
+                    ),
+                  )
+                ],
               ),
-              AdaptiveContainer(
-                columnSpan: 12,
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: Row(
-                    children: [
-                      const Text('Clear cache'),
-                      const SizedBox(width: 50),
-                      IconButton(
-                        onPressed: () {
-                          state.reset();
-                        },
-                        icon: const Icon(Icons.delete_outline_rounded),
-                      ),
-                    ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: Row(
+                children: [
+                  const Text('Clear cache'),
+                  const SizedBox(width: 50),
+                  IconButton(
+                    onPressed: () {
+                      state.reset();
+                    },
+                    icon: const Icon(Icons.delete_outline_rounded),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     });

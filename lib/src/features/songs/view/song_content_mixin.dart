@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/state/player_state.dart';
-import 'package:myartist/src/shared/classes/song.dart';
+import 'package:myartist/src/shared/models/song.dart';
 import 'package:myartist/src/shared/enums/display_type.dart';
 import 'package:myartist/src/shared/extensions.dart';
 import 'package:myartist/src/shared/playback/bloc/playback_bloc.dart';

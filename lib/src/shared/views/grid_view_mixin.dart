@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../classes/album.dart';
+import '../models/album.dart';
 import 'image_tile.dart';
 
 class GridViewMixin extends StatelessWidget {

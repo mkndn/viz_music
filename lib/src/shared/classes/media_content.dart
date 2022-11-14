@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:myartist/src/shared/classes/album.dart';
-import 'package:myartist/src/shared/classes/artist.dart';
-import 'package:myartist/src/shared/classes/playlist.dart';
-import 'package:myartist/src/shared/classes/song.dart';
+import 'package:myartist/src/shared/models/album.dart';
+import 'package:myartist/src/shared/models/artist.dart';
+import 'package:myartist/src/shared/models/playlist.dart';
+import 'package:myartist/src/shared/models/song.dart';
 import 'package:myartist/src/shared/enums/sorting.dart';
 import 'package:myartist/src/shared/mixins/media_sorting.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../classes/classes.dart';
+import 'package:myartist/src/shared/models/playlist.dart';
 import '../extensions.dart';
 import 'image_clipper.dart';
 

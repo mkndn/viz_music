@@ -3,22 +3,22 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:myartist/src/shared/enums/repeat_mode.dart';
+import 'package:myartist/src/shared/models/song.dart';
 import 'package:myartist/src/shared/services/disk_state_storage_manager.dart';
 import 'package:myartist/src/shared/state/player_state.dart';
-import '../../classes/classes.dart';
 
 part 'playback_event.dart';
 part 'playback_state.dart';
 part 'playback_bloc.freezed.dart';
 
 class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
-  final AudioPlayer player = AudioPlayer();
-  static final DiskStateStorageManager stateStorageManager =
+  final AudioPlayer _player = AudioPlayer();
+  static final DiskStateStorageManager _stateStorageManager =
       DiskStateStorageManager.instance();
 
-  PlaybackBloc() : super(PlaybackState.load(stateStorageManager.loadData())) {
+  PlaybackBloc() : super(PlaybackState.load(_stateStorageManager.loadData())) {
     if (state.songWithProgress?.progress != null) {
-      player.seek(state.songWithProgress!.progress);
+      _player.seek(state.songWithProgress!.progress);
     }
     on<PlaybackEvent>(
       (event, emit) => event.map(
@@ -36,7 +36,7 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
   }
 
   static const _playbackUpdateInterval = Duration(seconds: 1);
-  StreamSubscription<Duration>? currentlyPlayingSubscription;
+  StreamSubscription<Duration>? _currentlyPlayingSubscription;
 
   Stream<Duration> _startPlayingStream() async* {
     while (state.songWithProgress!.progress <
@@ -45,13 +45,13 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
       yield _playbackUpdateInterval;
       if (state.songWithProgress!.progress >=
           state.songWithProgress!.song.length) {
-        add(getEventByRepeatMode());
+        add(_getEventByRepeatMode());
         break;
       }
     }
   }
 
-  PlaybackEvent getEventByRepeatMode() {
+  PlaybackEvent _getEventByRepeatMode() {
     if (state.repeatMode.idx == 0) {
       if (state.currentIndex == state.queue.length - 1) {
         return PlaybackEvent.togglePlayPause();
@@ -82,15 +82,15 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
   }
 
   void _pausePlayback() {
-    player.pause();
-    currentlyPlayingSubscription!.cancel();
+    _player.pause();
+    _currentlyPlayingSubscription!.cancel();
   }
 
   void _resumePlayback() {
-    currentlyPlayingSubscription =
+    _currentlyPlayingSubscription =
         _startPlayingStream().listen(_handlePlaybackProgress);
     if (state.songWithProgress?.song != null) {
-      player.play(
+      _player.play(
         DeviceFileSource(state.songWithProgress!.song.path),
         mode: PlayerMode.mediaPlayer,
       );
@@ -113,8 +113,8 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
   }
 
   void _changeSong(ChangeSong event, Emitter<PlaybackState> emit) {
-    if (currentlyPlayingSubscription != null) {
-      currentlyPlayingSubscription!.cancel();
+    if (_currentlyPlayingSubscription != null) {
+      _currentlyPlayingSubscription!.cancel();
     }
     emit(
       state.copyWith(
@@ -147,7 +147,7 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
         previousVolume: null,
       ),
     );
-    player.setVolume(event.value);
+    _player.setVolume(event.value);
   }
 
   void _toggleMute(ToggleMute event, Emitter<PlaybackState> emit) {
@@ -196,12 +196,12 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
         ),
       ),
     );
-    player.seek(Duration(milliseconds: targetMilliseconds.toInt()));
+    _player.seek(Duration(milliseconds: targetMilliseconds.toInt()));
   }
 
   @override
   Future<void> close() async {
-    await currentlyPlayingSubscription?.cancel();
+    await _currentlyPlayingSubscription?.cancel();
     await super.close();
   }
 }

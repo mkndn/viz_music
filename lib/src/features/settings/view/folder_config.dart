@@ -7,6 +7,28 @@ import 'folder_picker.dart';
 class FolderConfig extends StatelessWidget {
   const FolderConfig({super.key});
 
+  Future<void> _loadFolderPrefs() async {
+    List<String> folderContents = await _prefs.getStringList(widget.mode.text);
+    _folders = folderContents
+        .map<Folder>((e) => Folder.fromJson(jsonDecode(e)))
+        .toList();
+  }
+
+  Future<void> _prepareStorage() async {
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      _rootDir = getDownloadsDirectory();
+    } else if (Platform.isAndroid || Platform.isIOS) {
+      _rootDir = getExternalStorageDirectory();
+    } else {
+      _rootDir = getTemporaryDirectory();
+    }
+  }
+
+  Future<FolderInfo> _getData() async {
+    Directory? rootDir = await _rootDir;
+    return FolderInfo(_edited, rootDir, _folders);
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
@@ -19,7 +41,7 @@ class FolderConfig extends StatelessWidget {
             leading: BackButton(
               onPressed: () => GoRouter.of(context).go('/settings'),
             ),
-            title: const Text('FOLDERS CONFIGURATION'),
+            title: const Text('Folder Setup'),
             toolbarHeight: kToolbarHeight * 2,
             bottom: PreferredSize(
               preferredSize: Size.fromHeight(kToolbarHeight + headerHeight),
@@ -43,16 +65,12 @@ class FolderConfig extends StatelessWidget {
           ),
           body: const TabBarView(
             children: [
-              SingleChildScrollView(
-                child: FolderPicker(
-                  mode: FolderMode.included,
-                ),
+              FolderPicker(
+                mode: FolderMode.included,
               ),
-              SingleChildScrollView(
-                child: FolderPicker(
-                  mode: FolderMode.excluded,
-                ),
-              )
+              FolderPicker(
+                mode: FolderMode.excluded,
+              ),
             ],
           ),
         ),

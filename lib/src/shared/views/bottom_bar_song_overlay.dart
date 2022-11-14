@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myartist/src/features/songs/view/song_list_mixin.dart';
-import 'package:myartist/src/shared/classes/song.dart';
+import 'package:myartist/src/shared/models/song.dart';
 
 class BottomBarSongOverlay extends StatelessWidget {
   const BottomBarSongOverlay(

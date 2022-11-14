@@ -2,9 +2,11 @@ import 'package:adaptive_components/adaptive_components.dart';
 import 'package:flutter/material.dart';
 import 'package:myartist/src/features/home/view/home_artists.dart';
 import 'package:myartist/src/features/home/view/home_highlight.dart';
-import 'package:myartist/src/shared/classes/classes.dart';
 import 'package:myartist/src/shared/classes/media_content.dart';
 import 'package:myartist/src/shared/extensions.dart';
+import 'package:myartist/src/shared/models/artist.dart';
+import 'package:myartist/src/shared/models/playlist.dart';
+import 'package:myartist/src/shared/models/song.dart';
 import 'package:myartist/src/shared/views/brightness_toggle.dart';
 
 class DesktopHomeScreen extends StatefulWidget {

@@ -1,7 +1,7 @@
 import 'package:adaptive_components/adaptive_components.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/classes/album.dart';
+import '../../../shared/models/album.dart';
 import '../../../shared/extensions.dart';
 
 class AlbumContent extends StatefulWidget {

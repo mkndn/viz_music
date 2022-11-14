@@ -1,4 +1,4 @@
-import 'package:myartist/src/shared/classes/song.dart';
+import 'package:myartist/src/shared/models/song.dart';
 import 'package:myartist/src/shared/enums/repeat_mode.dart';
 
 class PlayerStateModel {

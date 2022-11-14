@@ -6,7 +6,7 @@ import 'package:myartist/src/shared/extensions.dart';
 import 'package:myartist/src/shared/views/brightness_toggle.dart';
 import 'package:myartist/src/shared/views/image_tile.dart';
 
-import '../../../shared/classes/album.dart';
+import '../../../shared/models/album.dart';
 
 class AlbumScreen extends StatelessWidget {
   const AlbumScreen({required this.info, required this.id, super.key});

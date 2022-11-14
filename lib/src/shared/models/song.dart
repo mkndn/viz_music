@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
-import 'package:myartist/src/shared/classes/ranked.dart';
+import 'package:myartist/src/shared/models/ranked.dart';
 part 'song.g.dart';
 
 @HiveType(typeId: 1)

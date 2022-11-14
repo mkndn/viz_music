@@ -3,7 +3,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/classes/song.dart';
 import 'package:myartist/src/shared/mixins/utils.dart';
 import 'package:myartist/src/shared/services/album_services.dart';
 import 'package:myartist/src/shared/services/artist_services.dart';
@@ -11,9 +10,10 @@ import 'package:myartist/src/shared/services/hive_services.dart';
 import 'package:myartist/src/shared/services/playlist_services.dart';
 import 'package:myartist/src/shared/services/song_services.dart';
 
-import '../classes/album.dart';
-import '../classes/artist.dart';
-import '../classes/playlist.dart';
+import '../models/song.dart';
+import '../models/album.dart';
+import '../models/artist.dart';
+import '../models/playlist.dart';
 import '../mixins/randomness.dart';
 import '../mixins/media_util.dart';
 
@@ -179,11 +179,11 @@ class DiskMediaStoreManager with Randomness, MediaUtilMixin {
     );
   }
 
-  void resetAll() {
-    songsService.resetBox();
-    albumService.resetBox();
-    artistService.resetBox();
-    playlistService.resetBox();
+  Future<void> resetAll() async {
+    await songsService.resetBox();
+    await albumService.resetBox();
+    await artistService.resetBox();
+    await playlistService.resetBox();
   }
 
   MediaContent loadData() {

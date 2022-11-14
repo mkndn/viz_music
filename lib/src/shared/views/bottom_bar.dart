@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myartist/src/shared/classes/media_content.dart';
 import 'package:myartist/src/shared/enums/repeat_mode.dart';
+import 'package:myartist/src/shared/models/artist.dart';
+import 'package:myartist/src/shared/models/song.dart';
 import 'package:myartist/src/shared/state/inmemory_media_manager.dart';
 import 'package:myartist/src/shared/typedefs.dart';
 import 'package:myartist/src/shared/views/bottom_bar_song_overlay.dart';
@@ -41,7 +43,6 @@ class BottomBar extends StatelessWidget implements PreferredSizeWidget {
           currentIndex: state.currentIndex,
           upperLimit: state.queue.length,
           queue: state.queue,
-          durationStreamSupplier: bloc.currentlyPlayingSubscription.onData((data) { }),
           togglePlayPause: () => bloc.add(
             const PlaybackEvent.togglePlayPause(),
           ),
@@ -78,7 +79,6 @@ class _BottomBar extends StatefulWidget {
     required this.currentIndex,
     required this.upperLimit,
     required this.volume,
-    required this.durationStreamSupplier,
   });
 
   final InMemoryMediaManagerState mediaManagerState;
@@ -96,13 +96,12 @@ class _BottomBar extends StatefulWidget {
   final int currentIndex;
   final int upperLimit;
   final double volume;
-  final Supplier<Stream<Duration>> durationStreamSupplier;
 
   @override
   State<_BottomBar> createState() => _BottomBarState();
 }
 
-class _BottomBarState extends State<_BottomBar> {
+class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
   String? _artist;
   Duration? _progress;
   Song? _song;
@@ -123,24 +122,6 @@ class _BottomBarState extends State<_BottomBar> {
         await _rankMediaStreamSubscription!.cancel();
       }
     }
-  }
-
-  void triggerChangeSong(int triggerSongIndex) {
-    if (this._rankMediaStreamSubscription == null) {
-      this._rankMediaStreamSubscription = widget.durationStreamSupplier().listen(
-          (value) async => await handleRankMedia(value)
-              .whenComplete(() => this._rankMediaStreamSubscription = null));
-    }
-    widget.changeSong(triggerSongIndex);
-  }
-
-  void triggerPlayPause() async {
-    if (this._rankMediaStreamSubscription == null) {
-      this._rankMediaStreamSubscription = widget.durationStreamSupplier().listen(
-          (value) async => await handleRankMedia(value)
-              .whenComplete(() => this._rankMediaStreamSubscription = null));
-    }
-    widget.togglePlayPause();
   }
 
   void _buildSonglistOverlay(BuildContext context, List<Song> queue,
@@ -211,12 +192,29 @@ class _BottomBarState extends State<_BottomBar> {
     _artist = widget.songWithProgress?.song.artist;
     _progress = widget.songWithProgress?.progress;
     _song = widget.songWithProgress?.song;
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       this._overlayState = Overlay.of(context);
       _buildSonglistOverlay(
           context, widget.queue, widget.preferredSize, widget.currentIndex);
       if (widget.isFullPlayerOn) buildFullScreenPlayerOverlay(context);
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        //Execute the code here when user come back the app.
+        //In my case, I needed to show if user active or not,
+        break;
+      case AppLifecycleState.paused:
+        //Execute the code the when user leave the app
+        break;
+      default:
+        break;
+    }
   }
 
   @override
@@ -229,6 +227,10 @@ class _BottomBarState extends State<_BottomBar> {
       this._overlayState!.dispose();
       this._overlayState = null;
     }
+    if (widget.isPlaying) {
+      PlaybackEvent.togglePlayPause();
+    }
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -266,9 +268,9 @@ class _BottomBarState extends State<_BottomBar> {
                   _PlaybackControls(
                     key: Key("SonglistPlayerKey"),
                     isPlaying: widget.isPlaying,
-                    togglePlayPause: triggerPlayPause,
+                    togglePlayPause: widget.togglePlayPause,
                     changeRepeatMode: widget.changeRepeatMode,
-                    changeSong: triggerChangeSong,
+                    changeSong: widget.changeSong,
                     currentIndex: widget.currentIndex,
                     upperLimit: widget.upperLimit,
                     repeatMode: widget.repeatMode,

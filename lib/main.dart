@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:myartist/src/shared/adapters/duration.dart';
 import 'package:myartist/src/shared/adapters/repeat_mode.dart';
-import 'package:myartist/src/shared/classes/album.dart';
-import 'package:myartist/src/shared/classes/artist.dart';
-import 'package:myartist/src/shared/classes/playlist.dart';
-import 'package:myartist/src/shared/classes/ranked.dart';
-import 'package:myartist/src/shared/classes/song.dart';
+import 'package:myartist/src/shared/models/album.dart';
+import 'package:myartist/src/shared/models/artist.dart';
+import 'package:myartist/src/shared/models/playlist.dart';
+import 'package:myartist/src/shared/models/ranked.dart';
+import 'package:myartist/src/shared/models/song.dart';
 import 'package:myartist/src/shared/enums/hive_box.dart';
 import 'package:universal_platform/universal_platform.dart';
 

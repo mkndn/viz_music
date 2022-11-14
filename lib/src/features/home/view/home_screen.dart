@@ -19,12 +19,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool isFolderIntact = false;
+
   Future<void> loadState(
     InmemoryStateManagerState appState,
     InMemoryMediaManagerState mediaState,
     Function bloc,
   ) async {
-    if (!widget.mediaContent.hasContent) {
+    isFolderIntact = await mediaState.isFolderIntact();
+    if (!widget.mediaContent.hasContent && isFolderIntact) {
       bloc().add(const SplashScreenEvent.showSplashScreen());
       await mediaState.init().whenComplete(
             (() => {
@@ -58,7 +61,8 @@ class _HomeScreenState extends State<HomeScreen> {
           if (state.splashState == SplashState.load)
             return SplashScreen();
           else if (state.splashState == SplashState.close &&
-              appState.isStateLoaded) {
+              appState.isStateLoaded &&
+              isFolderIntact) {
             return LayoutBuilder(
               builder: (context, constraints) {
                 // Add conditional mobile layout
@@ -68,8 +72,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 return DesktopHomeScreen(mediaContent: widget.mediaContent);
               },
             );
+          } else if (!isFolderIntact) {
+            return LayoutBuilder(builder: (context, constraints) {
+              return Container(
+                alignment: Alignment.center,
+                child: const Text(
+                    'Songs no longer available. Please check your folder configuration'),
+              );
+            });
           } else {
-            return const Text('App is idle');
+            return LayoutBuilder(builder: (context, constraints) {
+              return Container(
+                alignment: Alignment.center,
+                child: const Text('App is idle'),
+              );
+            });
           }
         });
   }

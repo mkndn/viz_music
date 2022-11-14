@@ -2,7 +2,7 @@ import 'package:adaptive_components/adaptive_components.dart';
 import 'package:flutter/material.dart';
 import 'package:myartist/src/features/songs/view/song_list_mixin.dart';
 import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/classes/playlist.dart';
+import 'package:myartist/src/shared/models/playlist.dart';
 import 'package:myartist/src/shared/extensions.dart';
 import 'package:myartist/src/shared/views/brightness_toggle.dart';
 

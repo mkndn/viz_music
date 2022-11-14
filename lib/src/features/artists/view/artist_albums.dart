@@ -4,7 +4,7 @@ import 'package:myartist/src/shared/classes/media_content.dart';
 import 'package:myartist/src/shared/extensions.dart';
 import 'package:myartist/src/shared/views/brightness_toggle.dart';
 
-import '../../../shared/classes/artist.dart';
+import '../../../shared/models/artist.dart';
 import '../../../shared/views/grid_view_mixin.dart';
 
 class ArtistScreen extends StatelessWidget {

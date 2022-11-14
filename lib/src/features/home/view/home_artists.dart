@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myartist/src/shared/models/artist.dart';
 
-import '../../../shared/classes/classes.dart';
 import '../../../shared/extensions.dart';
 
 class HomeArtists extends StatelessWidget {

@@ -58,4 +58,9 @@ class Preferences {
   Future<void> setStringList(String key, List<String> val) async {
     await _prefs.then((value) => value.setStringList(key, val));
   }
+
+  Future<void> reset() async {
+    final prefs = await _prefs;
+    prefs.clear();
+  }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:myartist/src/shared/classes/playlist.dart';
+import 'package:myartist/src/shared/models/playlist.dart';
 import 'package:myartist/src/shared/classes/text_tile_content.dart';
 import 'package:myartist/src/shared/views/brightness_toggle.dart';
 import 'package:myartist/src/shared/views/text_tile_mixin.dart';

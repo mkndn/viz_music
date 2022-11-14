@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 // Add Google Fonts Package import
@@ -95,5 +97,19 @@ extension HumanizedDuration on Duration {
       value = '$inHours:$minutes:$seconds';
     }
     return value;
+  }
+}
+
+extension MapUtils<K, V> on Map<K, V> {
+  Future<V> putIfAbsentAsync(K key, FutureOr<V> Function() action) async {
+    final V? previous = this[key];
+    final V current;
+    if (previous == null) {
+      current = await action();
+      this[key] = current;
+    } else {
+      current = previous;
+    }
+    return current;
   }
 }

@@ -3,10 +3,10 @@ import 'package:myartist/src/features/home/view/home_artists.dart';
 import 'package:myartist/src/features/home/view/home_highlight.dart';
 import 'package:myartist/src/features/home/view/home_recent.dart';
 import 'package:myartist/src/features/songs/view/song_content_mixin.dart';
-import 'package:myartist/src/shared/classes/artist.dart';
+import 'package:myartist/src/shared/models/artist.dart';
 import 'package:myartist/src/shared/classes/media_content.dart';
 import 'package:myartist/src/shared/enums/display_type.dart';
-import 'package:myartist/src/shared/classes/playlist.dart';
+import 'package:myartist/src/shared/models/playlist.dart';
 import 'package:myartist/src/shared/views/brightness_toggle.dart';
 
 class MobileHomeScreen extends StatefulWidget {

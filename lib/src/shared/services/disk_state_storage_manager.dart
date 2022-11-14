@@ -1,6 +1,6 @@
-import 'package:myartist/src/shared/classes/classes.dart';
 import 'package:myartist/src/shared/enums/repeat_mode.dart';
 import 'package:myartist/src/shared/enums/state.dart';
+import 'package:myartist/src/shared/models/song.dart';
 import 'package:myartist/src/shared/playback/bloc/bloc.dart';
 import 'package:myartist/src/shared/services/hive_services.dart';
 import 'package:myartist/src/shared/services/player_state_service.dart';

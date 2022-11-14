@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:myartist/src/shared/classes/artist.dart';
+import 'package:myartist/src/shared/models/artist.dart';
 import 'package:myartist/src/shared/enums/hive_box.dart';
 import 'package:myartist/src/shared/services/hive_services.dart';
 

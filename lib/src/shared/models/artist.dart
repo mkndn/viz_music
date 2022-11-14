@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:hive/hive.dart';
-import 'package:myartist/src/shared/classes/ranked.dart';
+import 'package:myartist/src/shared/models/ranked.dart';
 part 'artist.g.dart';
 
 @HiveType(typeId: 3)

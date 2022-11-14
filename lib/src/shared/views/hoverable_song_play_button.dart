@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../classes/classes.dart';
+import 'package:myartist/src/shared/models/song.dart';
+
 import '../playback/bloc/bloc.dart';
 import '../views/views.dart';
 
