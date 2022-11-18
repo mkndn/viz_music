@@ -20,10 +20,10 @@ class AlbumAdapter extends TypeAdapter<Album> {
       fields[8] as DateTime,
       fields[9] as DateTime?,
       fields[7] as int,
-      id: fields[0] as String,
+      id: fields[0] as ObjectId,
       title: fields[1] as String,
       image: fields[2] as Uint8List,
-      songsInAlbum: (fields[5] as List).cast<String>(),
+      songsInAlbum: (fields[5] as List).cast<ObjectId>(),
       albumArtist: fields[3] as String?,
       year: fields[4] as String?,
     );

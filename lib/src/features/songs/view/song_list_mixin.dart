@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:myartist/src/shared/extensions.dart';
-import 'package:myartist/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/classes/song_queue.dart';
+import 'package:mkndn/src/shared/extensions.dart';
+import 'package:mkndn/src/shared/models/song.dart';
+import 'package:objectid/objectid.dart';
 import '../../../shared/playback/bloc/bloc.dart';
 import '../../../shared/views/image_clipper.dart';
 import '../../../shared/views/views.dart';
 
 class SongListMixin extends StatelessWidget {
-  const SongListMixin({super.key, required this.songs});
+  const SongListMixin({super.key, required this.queue});
 
-  final List<Song> songs;
+  final SongQueue queue;
+
+  PlaybackEvent getEvent(ObjectId songId, bool queueInitiated) {
+    return queueInitiated
+        ? PlaybackEvent.changeSong(queue.getSongById(songId))
+        : PlaybackEvent.initQueue(queue);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final PlaybackBloc bloc = BlocProvider.of<PlaybackBloc>(context);
     return AdaptiveTable<Song>(
-      items: songs,
+      items: queue.songs,
       breakpoint: 450,
       columns: const [
         DataColumn(
@@ -42,8 +51,10 @@ class SongListMixin extends StatelessWidget {
             Center(
               child: HoverableSongPlayButton(
                 hoverMode: HoverMode.overlay,
-                song: songs[index],
+                song: queue.songs[index],
                 index: index,
+                action: () => bloc.add(getEvent(
+                    queue.songs[index].id, bloc.state.queue.isNotEmpty)),
                 child: Center(
                   child: Text(
                     (index + 1).toString(),
@@ -58,25 +69,23 @@ class SongListMixin extends StatelessWidget {
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 2, vertical: 10),
-                child: ClippedImage(songs[index].image),
+                child: ClippedImage(queue.songs[index].image),
               ),
               const SizedBox(width: 10),
-              Expanded(child: Text(songs[index].title)),
+              Expanded(child: Text(queue.songs[index].title)),
             ]),
           ),
           DataCell(
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              child: Text(songs[index].length.toHumanizedString()),
+              child: Text(queue.songs[index].length.toHumanizedString()),
             ),
           ),
         ],
       ),
       itemBuilder: (song, index) {
         return ListTile(
-          onTap: () => BlocProvider.of<PlaybackBloc>(context).add(
-            PlaybackEvent.changeSong(index),
-          ),
+          onTap: () => bloc.add(getEvent(song.id, bloc.state.queue.isNotEmpty)),
           leading: ClippedImage(song.image),
           title: Text(song.title),
           subtitle: Text(song.length.toHumanizedString()),

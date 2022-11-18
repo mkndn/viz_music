@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/extensions.dart';
-import 'package:myartist/src/shared/views/brightness_toggle.dart';
+import 'package:mkndn/src/shared/classes/media_content.dart';
+import 'package:mkndn/src/shared/extensions.dart';
+import 'package:mkndn/src/shared/views/brightness_toggle.dart';
+import 'package:objectid/objectid.dart';
 
 import '../../../shared/models/artist.dart';
 import '../../../shared/views/grid_view_mixin.dart';
@@ -15,7 +16,7 @@ class ArtistScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Artist? artist = info.getArtistById(id);
+    Artist? artist = info.getArtistById(ObjectId.fromHexString(id));
     return LayoutBuilder(
       builder: (context, constraints) {
         return Padding(

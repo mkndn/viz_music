@@ -1,13 +1,14 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
-import 'package:myartist/src/shared/models/ranked.dart';
+import 'package:mkndn/src/shared/models/ranked.dart';
+import 'package:objectid/objectid.dart';
 part 'playlist.g.dart';
 
 @HiveType(typeId: 4)
 class Playlist extends Ranked {
   @HiveField(0)
-  final String id;
+  final ObjectId id;
   @HiveField(1)
   final String title;
   @HiveField(2)
@@ -15,7 +16,7 @@ class Playlist extends Ranked {
   @HiveField(3)
   final Uint8List cover;
   @HiveField(4)
-  final List<String> songs;
+  final List<ObjectId> songs;
 
   Playlist(
     DateTime dateAdded,

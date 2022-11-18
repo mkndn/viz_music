@@ -1,4 +1,4 @@
-import 'package:myartist/src/shared/extensions.dart';
+import 'package:mkndn/src/shared/extensions.dart';
 
 class Utils {
   static T defautIfNull<T>(T? Function() func, T defaultValue) {

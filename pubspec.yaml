@@ -1,5 +1,5 @@
-name: myartist
-description: A new Flutter project.
+name: mkndn
+description: A music player build with love using Flutter project.
 publish_to: "none"
 version: 1.0.0
 
@@ -28,7 +28,10 @@ dependencies:
   google_fonts: ^3.0.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  json_annotation: ^4.7.0
+  json_serializable: ^6.5.4
   material_color_utilities: ^0.1.5
+  objectid: ^2.1.0
   shared_preferences: ^2.0.15
   universal_platform: ^1.0.0+1
   url_launcher: ^6.1.6

@@ -11,7 +11,6 @@ enum SongListDisplayState { display, sortedBy, sortMode }
 
 enum PlayerStateKey {
   queue,
-  currentIndex,
   progress,
   isMuted,
   isPlaying,

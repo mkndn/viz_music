@@ -2,13 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/enums/repeat_mode.dart';
-import 'package:myartist/src/shared/models/artist.dart';
-import 'package:myartist/src/shared/models/song.dart';
-import 'package:myartist/src/shared/state/inmemory_media_manager.dart';
-import 'package:myartist/src/shared/typedefs.dart';
-import 'package:myartist/src/shared/views/bottom_bar_song_overlay.dart';
+import 'package:mkndn/src/shared/classes/media_content.dart';
+import 'package:mkndn/src/shared/classes/song_queue.dart';
+import 'package:mkndn/src/shared/enums/repeat_mode.dart';
+import 'package:mkndn/src/shared/models/artist.dart';
+import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/state/inmemory_media_manager.dart';
+import 'package:mkndn/src/shared/typedefs.dart';
+import 'package:mkndn/src/shared/views/bottom_bar_song_overlay.dart';
+import 'package:objectid/objectid.dart';
 
 import '../classes/classes.dart';
 import '../extensions.dart';
@@ -40,14 +42,12 @@ class BottomBar extends StatelessWidget implements PreferredSizeWidget {
           isFullPlayerOn: state.isFullPlayerOn,
           repeatMode: state.repeatMode,
           preferredSize: preferredSize,
-          currentIndex: state.currentIndex,
-          upperLimit: state.queue.length,
           queue: state.queue,
           togglePlayPause: () => bloc.add(
             const PlaybackEvent.togglePlayPause(),
           ),
-          changeSong: (int index) {
-            bloc.add(PlaybackEvent.changeSong(index));
+          changeSong: (Song song) {
+            bloc.add(PlaybackEvent.changeSong(song));
           },
           toggleFullPlayer: () => bloc.add(
             const PlaybackEvent.toggleFullPlayer(),
@@ -76,8 +76,6 @@ class _BottomBar extends StatefulWidget {
     required this.toggleFullPlayer,
     required this.changeRepeatMode,
     required this.changeSong,
-    required this.currentIndex,
-    required this.upperLimit,
     required this.volume,
   });
 
@@ -88,13 +86,11 @@ class _BottomBar extends StatefulWidget {
   final bool isFullPlayerOn;
   final RepeatMode repeatMode;
   final Size preferredSize;
-  final List<Song> queue;
+  final SongQueue queue;
   final VoidCallback togglePlayPause;
   final VoidCallback toggleFullPlayer;
   final VoidCallback changeRepeatMode;
-  final Consumer<int> changeSong;
-  final int currentIndex;
-  final int upperLimit;
+  final Consumer<Song> changeSong;
   final double volume;
 
   @override
@@ -102,7 +98,7 @@ class _BottomBar extends StatefulWidget {
 }
 
 class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
-  String? _artist;
+  ObjectId? _artist;
   Duration? _progress;
   Song? _song;
   OverlayState? _overlayState = null;
@@ -124,8 +120,8 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
     }
   }
 
-  void _buildSonglistOverlay(BuildContext context, List<Song> queue,
-      Size parentSize, int currentIndex) {
+  void _buildSonglistOverlay(
+      BuildContext context, SongQueue queue, Size parentSize) {
     this._songlistOverlay = OverlayEntry(
       builder: (context) => Stack(
         children: [
@@ -134,7 +130,6 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
             child: BottomBarSongOverlay(
               parentSize: parentSize,
               queue: queue,
-              currentSong: queue[currentIndex],
             ),
           ),
         ],
@@ -195,8 +190,7 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       this._overlayState = Overlay.of(context);
-      _buildSonglistOverlay(
-          context, widget.queue, widget.preferredSize, widget.currentIndex);
+      _buildSonglistOverlay(context, widget.queue, widget.preferredSize);
       if (widget.isFullPlayerOn) buildFullScreenPlayerOverlay(context);
     });
   }
@@ -271,8 +265,7 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
                     togglePlayPause: widget.togglePlayPause,
                     changeRepeatMode: widget.changeRepeatMode,
                     changeSong: widget.changeSong,
-                    currentIndex: widget.currentIndex,
-                    upperLimit: widget.upperLimit,
+                    queue: widget.queue,
                     repeatMode: widget.repeatMode,
                     songlistValue: _isSonglistLoaded,
                     renderSonglist: _renderSonglistOverlay,
@@ -529,8 +522,7 @@ class _PlaybackControls extends StatelessWidget {
     required this.togglePlayPause,
     required this.changeRepeatMode,
     required this.changeSong,
-    required this.currentIndex,
-    required this.upperLimit,
+    required this.queue,
     required this.repeatMode,
     required this.renderSonglist,
     required this.songlistValue,
@@ -539,9 +531,8 @@ class _PlaybackControls extends StatelessWidget {
   final bool isPlaying;
   final VoidCallback togglePlayPause;
   final VoidCallback changeRepeatMode;
-  final Consumer<int> changeSong;
-  final int currentIndex;
-  final int upperLimit;
+  final Consumer<Song> changeSong;
+  final SongQueue queue;
   final RepeatMode repeatMode;
   final VoidCallback renderSonglist;
   final ValueNotifier<bool> songlistValue;
@@ -567,8 +558,7 @@ class _PlaybackControls extends StatelessWidget {
               child: Icon(Icons.shuffle, size: 20)),
           IconButton(
             icon: Icon(Icons.skip_previous, size: iconSize),
-            onPressed: () =>
-                (currentIndex - 1 >= 0) ? changeSong(currentIndex - 1) : {},
+            onPressed: () => queue.getPreviousSong(),
           ),
           Padding(
             padding: EdgeInsets.fromLTRB(playPadding, 0, innerPadding, 0),
@@ -582,9 +572,7 @@ class _PlaybackControls extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.skip_next, size: iconSize),
-            onPressed: () => (currentIndex + 1 < upperLimit)
-                ? changeSong(currentIndex + 1)
-                : {},
+            onPressed: () => changeSong(queue.getNextSong()),
           ),
           Padding(
             padding: EdgeInsets.fromLTRB(innerPadding, 0, 0, 0),
@@ -739,8 +727,7 @@ class _FullScreenPlayerState extends State<_FullScreenPlayer> {
     final bloc = BlocProvider.of<PlaybackBloc>(context);
     final current = state.songWithProgress;
     final song = current?.song;
-    final currentIndex = state.currentIndex;
-    final upperLimit = state.queue.length;
+    final queue = state.queue;
     final repeatMode = state.repeatMode;
     final Artist? artist =
         song?.artist != null ? widget.info.getArtistById(song!.artist) : null;
@@ -836,8 +823,7 @@ class _FullScreenPlayerState extends State<_FullScreenPlayer> {
                       bloc.add(PlaybackEvent.changeSong(index)),
                   changeRepeatMode: () =>
                       bloc.add(const PlaybackEvent.changeRepeatMode()),
-                  currentIndex: currentIndex,
-                  upperLimit: upperLimit,
+                  queue: queue,
                   repeatMode: repeatMode,
                   renderSonglist: widget.renderSonglist,
                   songlistValue: widget.songlistLoaded,
@@ -886,8 +872,7 @@ class _MobilePlayer extends StatelessWidget {
       BuildContext context, PlaybackState state, BoxConstraints dimens) {
     final bloc = BlocProvider.of<PlaybackBloc>(context);
     final current = state.songWithProgress;
-    final currentIndex = state.currentIndex;
-    final upperLimit = state.queue.length;
+    final queue = state.queue;
     final repeatMode = state.repeatMode;
     final Artist? artist = current?.song.artist != null
         ? info.getArtistById(current!.song.artist)
@@ -974,12 +959,11 @@ class _MobilePlayer extends StatelessWidget {
                       isPlaying: state.isPlaying,
                       togglePlayPause: () =>
                           bloc.add(const PlaybackEvent.togglePlayPause()),
-                      changeSong: (int index) =>
-                          bloc.add(PlaybackEvent.changeSong(index)),
+                      changeSong: (Song song) =>
+                          bloc.add(PlaybackEvent.changeSong(song)),
                       changeRepeatMode: () =>
                           bloc.add(const PlaybackEvent.changeRepeatMode()),
-                      currentIndex: currentIndex,
-                      upperLimit: upperLimit,
+                      queue: queue,
                       repeatMode: repeatMode,
                       renderSonglist: renderSonglist,
                       songlistValue: songlistValue,

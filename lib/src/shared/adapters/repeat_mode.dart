@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:myartist/src/shared/enums/repeat_mode.dart';
+import 'package:mkndn/src/shared/enums/repeat_mode.dart';
 
 class RepeatModeAdapter extends TypeAdapter<RepeatMode> {
   @override

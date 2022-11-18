@@ -2,10 +2,11 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:myartist/src/shared/enums/repeat_mode.dart';
-import 'package:myartist/src/shared/models/song.dart';
-import 'package:myartist/src/shared/services/disk_state_storage_manager.dart';
-import 'package:myartist/src/shared/state/player_state.dart';
+import 'package:mkndn/src/shared/classes/song_queue.dart';
+import 'package:mkndn/src/shared/enums/repeat_mode.dart';
+import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/services/disk_state_storage_manager.dart';
+import 'package:mkndn/src/shared/state/player_state.dart';
 
 part 'playback_event.dart';
 part 'playback_state.dart';
@@ -45,28 +46,28 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
       yield _playbackUpdateInterval;
       if (state.songWithProgress!.progress >=
           state.songWithProgress!.song.length) {
-        add(_getEventByRepeatMode());
+        add(_getEventByRepeatMode(true));
         break;
       }
     }
   }
 
-  PlaybackEvent _getEventByRepeatMode() {
+  PlaybackEvent _getEventByRepeatMode(bool isAutoMode) {
     if (state.repeatMode.idx == 0) {
-      if (state.currentIndex == state.queue.length - 1) {
+      if (state.queue.isLastSong) {
         return PlaybackEvent.togglePlayPause();
       } else {
-        return PlaybackEvent.changeSong(state.currentIndex + 1);
+        return PlaybackEvent.changeSong(state.queue.getNextSong());
       }
     }
     if (state.repeatMode.idx == 1) {
-      return PlaybackEvent.changeSong(state.currentIndex);
+      return PlaybackEvent.changeSong(state.queue.currentSong);
     }
 
-    if (state.currentIndex == state.queue.length - 1) {
-      return PlaybackEvent.changeSong(0);
+    if (state.queue.isLastSong) {
+      return PlaybackEvent.changeSong(state.queue.getFirstSong());
     } else {
-      return PlaybackEvent.changeSong(state.currentIndex + 1);
+      return PlaybackEvent.changeSong(state.queue.getNextSong());
     }
   }
 
@@ -102,10 +103,9 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
       state.copyWith(
         isPlaying: true,
         queue: event.queue,
-        currentIndex: event.currentIndex,
         songWithProgress: SongWithProgress(
           progress: const Duration(),
-          song: event.queue[event.currentIndex],
+          song: event.queue.currentSong,
         ),
       ),
     );
@@ -119,10 +119,9 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
     emit(
       state.copyWith(
         isPlaying: true,
-        currentIndex: event.index,
         songWithProgress: SongWithProgress(
           progress: const Duration(),
-          song: state.queue[event.index],
+          song: event.song,
         ),
       ),
     );

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:myartist/src/features/home/view/home_artists.dart';
-import 'package:myartist/src/features/home/view/home_highlight.dart';
-import 'package:myartist/src/features/home/view/home_recent.dart';
-import 'package:myartist/src/features/songs/view/song_content_mixin.dart';
-import 'package:myartist/src/shared/models/artist.dart';
-import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/enums/display_type.dart';
-import 'package:myartist/src/shared/models/playlist.dart';
-import 'package:myartist/src/shared/views/brightness_toggle.dart';
+import 'package:mkndn/src/features/home/view/home_artists.dart';
+import 'package:mkndn/src/features/home/view/home_highlight.dart';
+import 'package:mkndn/src/features/home/view/home_recent.dart';
+import 'package:mkndn/src/features/songs/view/song_content_mixin.dart';
+import 'package:mkndn/src/shared/classes/song_queue.dart';
+import 'package:mkndn/src/shared/models/artist.dart';
+import 'package:mkndn/src/shared/classes/media_content.dart';
+import 'package:mkndn/src/shared/enums/display_type.dart';
+import 'package:mkndn/src/shared/models/playlist.dart';
+import 'package:mkndn/src/shared/views/brightness_toggle.dart';
 
 class MobileHomeScreen extends StatefulWidget {
   const MobileHomeScreen({required this.mediaContent, super.key});
@@ -67,17 +68,21 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
               ),
               SongContentMixin(
                 mediaContent: widget.mediaContent,
-                songs: widget.mediaContent.getSongsById(
-                  topSongs.songs,
-                ),
+                queue: SongQueue.init(
+                    widget.mediaContent.getSongsById(
+                      topSongs.songs,
+                    ),
+                    topSongs.songs[0]),
                 constraints: constraints,
                 display: DisplayType.GRID,
               ),
               SongContentMixin(
                 mediaContent: widget.mediaContent,
-                songs: widget.mediaContent.getSongsById(
-                  newReleases.songs,
-                ),
+                queue: SongQueue.init(
+                    widget.mediaContent.getSongsById(
+                      newReleases.songs,
+                    ),
+                    newReleases.songs[0]),
                 display: DisplayType.GRID,
                 constraints: constraints,
               ),

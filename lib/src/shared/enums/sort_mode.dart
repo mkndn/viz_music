@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:myartist/src/shared/mixins/utils.dart';
+import 'package:mkndn/src/shared/mixins/utils.dart';
 
 enum SortMode {
   ASC('Ascending'),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:myartist/src/shared/animations/expand_icon.dart';
+import 'package:mkndn/src/shared/animations/expand_icon.dart';
 
 class SearchBar extends StatelessWidget {
   final bool isSearching;

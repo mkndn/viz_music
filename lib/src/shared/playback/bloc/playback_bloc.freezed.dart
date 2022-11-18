@@ -19,8 +19,8 @@ mixin _$PlaybackEvent {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() togglePlayPause,
-    required TResult Function(int index) changeSong,
-    required TResult Function(List<Song> queue, int currentIndex) initQueue,
+    required TResult Function(Song song) changeSong,
+    required TResult Function(SongQueue queue) initQueue,
     required TResult Function(double value) setVolume,
     required TResult Function() toggleMute,
     required TResult Function() toggleFullPlayer,
@@ -32,8 +32,8 @@ mixin _$PlaybackEvent {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? togglePlayPause,
-    TResult? Function(int index)? changeSong,
-    TResult? Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult? Function(Song song)? changeSong,
+    TResult? Function(SongQueue queue)? initQueue,
     TResult? Function(double value)? setVolume,
     TResult? Function()? toggleMute,
     TResult? Function()? toggleFullPlayer,
@@ -45,8 +45,8 @@ mixin _$PlaybackEvent {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? togglePlayPause,
-    TResult Function(int index)? changeSong,
-    TResult Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult Function(Song song)? changeSong,
+    TResult Function(SongQueue queue)? initQueue,
     TResult Function(double value)? setVolume,
     TResult Function()? toggleMute,
     TResult Function()? toggleFullPlayer,
@@ -155,8 +155,8 @@ class _$TogglePlayPause implements TogglePlayPause {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() togglePlayPause,
-    required TResult Function(int index) changeSong,
-    required TResult Function(List<Song> queue, int currentIndex) initQueue,
+    required TResult Function(Song song) changeSong,
+    required TResult Function(SongQueue queue) initQueue,
     required TResult Function(double value) setVolume,
     required TResult Function() toggleMute,
     required TResult Function() toggleFullPlayer,
@@ -171,8 +171,8 @@ class _$TogglePlayPause implements TogglePlayPause {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? togglePlayPause,
-    TResult? Function(int index)? changeSong,
-    TResult? Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult? Function(Song song)? changeSong,
+    TResult? Function(SongQueue queue)? initQueue,
     TResult? Function(double value)? setVolume,
     TResult? Function()? toggleMute,
     TResult? Function()? toggleFullPlayer,
@@ -187,8 +187,8 @@ class _$TogglePlayPause implements TogglePlayPause {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? togglePlayPause,
-    TResult Function(int index)? changeSong,
-    TResult Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult Function(Song song)? changeSong,
+    TResult Function(SongQueue queue)? initQueue,
     TResult Function(double value)? setVolume,
     TResult Function()? toggleMute,
     TResult Function()? toggleFullPlayer,
@@ -266,7 +266,7 @@ abstract class _$$ChangeSongCopyWith<$Res> {
           _$ChangeSong value, $Res Function(_$ChangeSong) then) =
       __$$ChangeSongCopyWithImpl<$Res>;
   @useResult
-  $Res call({int index});
+  $Res call({Song song});
 }
 
 /// @nodoc
@@ -280,13 +280,13 @@ class __$$ChangeSongCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? index = null,
+    Object? song = null,
   }) {
     return _then(_$ChangeSong(
-      null == index
-          ? _value.index
-          : index // ignore: cast_nullable_to_non_nullable
-              as int,
+      null == song
+          ? _value.song
+          : song // ignore: cast_nullable_to_non_nullable
+              as Song,
     ));
   }
 }
@@ -294,14 +294,14 @@ class __$$ChangeSongCopyWithImpl<$Res>
 /// @nodoc
 
 class _$ChangeSong implements ChangeSong {
-  const _$ChangeSong(this.index);
+  const _$ChangeSong(this.song);
 
   @override
-  final int index;
+  final Song song;
 
   @override
   String toString() {
-    return 'PlaybackEvent.changeSong(index: $index)';
+    return 'PlaybackEvent.changeSong(song: $song)';
   }
 
   @override
@@ -309,11 +309,11 @@ class _$ChangeSong implements ChangeSong {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ChangeSong &&
-            (identical(other.index, index) || other.index == index));
+            (identical(other.song, song) || other.song == song));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, index);
+  int get hashCode => Object.hash(runtimeType, song);
 
   @JsonKey(ignore: true)
   @override
@@ -325,8 +325,8 @@ class _$ChangeSong implements ChangeSong {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() togglePlayPause,
-    required TResult Function(int index) changeSong,
-    required TResult Function(List<Song> queue, int currentIndex) initQueue,
+    required TResult Function(Song song) changeSong,
+    required TResult Function(SongQueue queue) initQueue,
     required TResult Function(double value) setVolume,
     required TResult Function() toggleMute,
     required TResult Function() toggleFullPlayer,
@@ -334,15 +334,15 @@ class _$ChangeSong implements ChangeSong {
     required TResult Function(double percent) moveToInSong,
     required TResult Function(Duration duration) songProgress,
   }) {
-    return changeSong(index);
+    return changeSong(song);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? togglePlayPause,
-    TResult? Function(int index)? changeSong,
-    TResult? Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult? Function(Song song)? changeSong,
+    TResult? Function(SongQueue queue)? initQueue,
     TResult? Function(double value)? setVolume,
     TResult? Function()? toggleMute,
     TResult? Function()? toggleFullPlayer,
@@ -350,15 +350,15 @@ class _$ChangeSong implements ChangeSong {
     TResult? Function(double percent)? moveToInSong,
     TResult? Function(Duration duration)? songProgress,
   }) {
-    return changeSong?.call(index);
+    return changeSong?.call(song);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? togglePlayPause,
-    TResult Function(int index)? changeSong,
-    TResult Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult Function(Song song)? changeSong,
+    TResult Function(SongQueue queue)? initQueue,
     TResult Function(double value)? setVolume,
     TResult Function()? toggleMute,
     TResult Function()? toggleFullPlayer,
@@ -368,7 +368,7 @@ class _$ChangeSong implements ChangeSong {
     required TResult orElse(),
   }) {
     if (changeSong != null) {
-      return changeSong(index);
+      return changeSong(song);
     }
     return orElse();
   }
@@ -427,9 +427,9 @@ class _$ChangeSong implements ChangeSong {
 }
 
 abstract class ChangeSong implements PlaybackEvent {
-  const factory ChangeSong(final int index) = _$ChangeSong;
+  const factory ChangeSong(final Song song) = _$ChangeSong;
 
-  int get index;
+  Song get song;
   @JsonKey(ignore: true)
   _$$ChangeSongCopyWith<_$ChangeSong> get copyWith =>
       throw _privateConstructorUsedError;
@@ -441,7 +441,7 @@ abstract class _$$InitQueueCopyWith<$Res> {
           _$InitQueue value, $Res Function(_$InitQueue) then) =
       __$$InitQueueCopyWithImpl<$Res>;
   @useResult
-  $Res call({List<Song> queue, int currentIndex});
+  $Res call({SongQueue queue});
 }
 
 /// @nodoc
@@ -456,17 +456,12 @@ class __$$InitQueueCopyWithImpl<$Res>
   @override
   $Res call({
     Object? queue = null,
-    Object? currentIndex = null,
   }) {
     return _then(_$InitQueue(
       null == queue
-          ? _value._queue
+          ? _value.queue
           : queue // ignore: cast_nullable_to_non_nullable
-              as List<Song>,
-      null == currentIndex
-          ? _value.currentIndex
-          : currentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
+              as SongQueue,
     ));
   }
 }
@@ -474,21 +469,14 @@ class __$$InitQueueCopyWithImpl<$Res>
 /// @nodoc
 
 class _$InitQueue implements InitQueue {
-  const _$InitQueue(final List<Song> queue, this.currentIndex) : _queue = queue;
-
-  final List<Song> _queue;
-  @override
-  List<Song> get queue {
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_queue);
-  }
+  const _$InitQueue(this.queue);
 
   @override
-  final int currentIndex;
+  final SongQueue queue;
 
   @override
   String toString() {
-    return 'PlaybackEvent.initQueue(queue: $queue, currentIndex: $currentIndex)';
+    return 'PlaybackEvent.initQueue(queue: $queue)';
   }
 
   @override
@@ -496,14 +484,11 @@ class _$InitQueue implements InitQueue {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$InitQueue &&
-            const DeepCollectionEquality().equals(other._queue, _queue) &&
-            (identical(other.currentIndex, currentIndex) ||
-                other.currentIndex == currentIndex));
+            (identical(other.queue, queue) || other.queue == queue));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, const DeepCollectionEquality().hash(_queue), currentIndex);
+  int get hashCode => Object.hash(runtimeType, queue);
 
   @JsonKey(ignore: true)
   @override
@@ -515,8 +500,8 @@ class _$InitQueue implements InitQueue {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() togglePlayPause,
-    required TResult Function(int index) changeSong,
-    required TResult Function(List<Song> queue, int currentIndex) initQueue,
+    required TResult Function(Song song) changeSong,
+    required TResult Function(SongQueue queue) initQueue,
     required TResult Function(double value) setVolume,
     required TResult Function() toggleMute,
     required TResult Function() toggleFullPlayer,
@@ -524,15 +509,15 @@ class _$InitQueue implements InitQueue {
     required TResult Function(double percent) moveToInSong,
     required TResult Function(Duration duration) songProgress,
   }) {
-    return initQueue(queue, currentIndex);
+    return initQueue(queue);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? togglePlayPause,
-    TResult? Function(int index)? changeSong,
-    TResult? Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult? Function(Song song)? changeSong,
+    TResult? Function(SongQueue queue)? initQueue,
     TResult? Function(double value)? setVolume,
     TResult? Function()? toggleMute,
     TResult? Function()? toggleFullPlayer,
@@ -540,15 +525,15 @@ class _$InitQueue implements InitQueue {
     TResult? Function(double percent)? moveToInSong,
     TResult? Function(Duration duration)? songProgress,
   }) {
-    return initQueue?.call(queue, currentIndex);
+    return initQueue?.call(queue);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? togglePlayPause,
-    TResult Function(int index)? changeSong,
-    TResult Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult Function(Song song)? changeSong,
+    TResult Function(SongQueue queue)? initQueue,
     TResult Function(double value)? setVolume,
     TResult Function()? toggleMute,
     TResult Function()? toggleFullPlayer,
@@ -558,7 +543,7 @@ class _$InitQueue implements InitQueue {
     required TResult orElse(),
   }) {
     if (initQueue != null) {
-      return initQueue(queue, currentIndex);
+      return initQueue(queue);
     }
     return orElse();
   }
@@ -617,11 +602,9 @@ class _$InitQueue implements InitQueue {
 }
 
 abstract class InitQueue implements PlaybackEvent {
-  const factory InitQueue(final List<Song> queue, final int currentIndex) =
-      _$InitQueue;
+  const factory InitQueue(final SongQueue queue) = _$InitQueue;
 
-  List<Song> get queue;
-  int get currentIndex;
+  SongQueue get queue;
   @JsonKey(ignore: true)
   _$$InitQueueCopyWith<_$InitQueue> get copyWith =>
       throw _privateConstructorUsedError;
@@ -692,8 +675,8 @@ class _$SetVolume implements SetVolume {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() togglePlayPause,
-    required TResult Function(int index) changeSong,
-    required TResult Function(List<Song> queue, int currentIndex) initQueue,
+    required TResult Function(Song song) changeSong,
+    required TResult Function(SongQueue queue) initQueue,
     required TResult Function(double value) setVolume,
     required TResult Function() toggleMute,
     required TResult Function() toggleFullPlayer,
@@ -708,8 +691,8 @@ class _$SetVolume implements SetVolume {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? togglePlayPause,
-    TResult? Function(int index)? changeSong,
-    TResult? Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult? Function(Song song)? changeSong,
+    TResult? Function(SongQueue queue)? initQueue,
     TResult? Function(double value)? setVolume,
     TResult? Function()? toggleMute,
     TResult? Function()? toggleFullPlayer,
@@ -724,8 +707,8 @@ class _$SetVolume implements SetVolume {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? togglePlayPause,
-    TResult Function(int index)? changeSong,
-    TResult Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult Function(Song song)? changeSong,
+    TResult Function(SongQueue queue)? initQueue,
     TResult Function(double value)? setVolume,
     TResult Function()? toggleMute,
     TResult Function()? toggleFullPlayer,
@@ -841,8 +824,8 @@ class _$ToggleMute implements ToggleMute {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() togglePlayPause,
-    required TResult Function(int index) changeSong,
-    required TResult Function(List<Song> queue, int currentIndex) initQueue,
+    required TResult Function(Song song) changeSong,
+    required TResult Function(SongQueue queue) initQueue,
     required TResult Function(double value) setVolume,
     required TResult Function() toggleMute,
     required TResult Function() toggleFullPlayer,
@@ -857,8 +840,8 @@ class _$ToggleMute implements ToggleMute {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? togglePlayPause,
-    TResult? Function(int index)? changeSong,
-    TResult? Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult? Function(Song song)? changeSong,
+    TResult? Function(SongQueue queue)? initQueue,
     TResult? Function(double value)? setVolume,
     TResult? Function()? toggleMute,
     TResult? Function()? toggleFullPlayer,
@@ -873,8 +856,8 @@ class _$ToggleMute implements ToggleMute {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? togglePlayPause,
-    TResult Function(int index)? changeSong,
-    TResult Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult Function(Song song)? changeSong,
+    TResult Function(SongQueue queue)? initQueue,
     TResult Function(double value)? setVolume,
     TResult Function()? toggleMute,
     TResult Function()? toggleFullPlayer,
@@ -985,8 +968,8 @@ class _$ToggleFullPlayer implements ToggleFullPlayer {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() togglePlayPause,
-    required TResult Function(int index) changeSong,
-    required TResult Function(List<Song> queue, int currentIndex) initQueue,
+    required TResult Function(Song song) changeSong,
+    required TResult Function(SongQueue queue) initQueue,
     required TResult Function(double value) setVolume,
     required TResult Function() toggleMute,
     required TResult Function() toggleFullPlayer,
@@ -1001,8 +984,8 @@ class _$ToggleFullPlayer implements ToggleFullPlayer {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? togglePlayPause,
-    TResult? Function(int index)? changeSong,
-    TResult? Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult? Function(Song song)? changeSong,
+    TResult? Function(SongQueue queue)? initQueue,
     TResult? Function(double value)? setVolume,
     TResult? Function()? toggleMute,
     TResult? Function()? toggleFullPlayer,
@@ -1017,8 +1000,8 @@ class _$ToggleFullPlayer implements ToggleFullPlayer {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? togglePlayPause,
-    TResult Function(int index)? changeSong,
-    TResult Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult Function(Song song)? changeSong,
+    TResult Function(SongQueue queue)? initQueue,
     TResult Function(double value)? setVolume,
     TResult Function()? toggleMute,
     TResult Function()? toggleFullPlayer,
@@ -1129,8 +1112,8 @@ class _$ChangeRepeatMode implements ChangeRepeatMode {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() togglePlayPause,
-    required TResult Function(int index) changeSong,
-    required TResult Function(List<Song> queue, int currentIndex) initQueue,
+    required TResult Function(Song song) changeSong,
+    required TResult Function(SongQueue queue) initQueue,
     required TResult Function(double value) setVolume,
     required TResult Function() toggleMute,
     required TResult Function() toggleFullPlayer,
@@ -1145,8 +1128,8 @@ class _$ChangeRepeatMode implements ChangeRepeatMode {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? togglePlayPause,
-    TResult? Function(int index)? changeSong,
-    TResult? Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult? Function(Song song)? changeSong,
+    TResult? Function(SongQueue queue)? initQueue,
     TResult? Function(double value)? setVolume,
     TResult? Function()? toggleMute,
     TResult? Function()? toggleFullPlayer,
@@ -1161,8 +1144,8 @@ class _$ChangeRepeatMode implements ChangeRepeatMode {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? togglePlayPause,
-    TResult Function(int index)? changeSong,
-    TResult Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult Function(Song song)? changeSong,
+    TResult Function(SongQueue queue)? initQueue,
     TResult Function(double value)? setVolume,
     TResult Function()? toggleMute,
     TResult Function()? toggleFullPlayer,
@@ -1299,8 +1282,8 @@ class _$MoveToInSong implements MoveToInSong {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() togglePlayPause,
-    required TResult Function(int index) changeSong,
-    required TResult Function(List<Song> queue, int currentIndex) initQueue,
+    required TResult Function(Song song) changeSong,
+    required TResult Function(SongQueue queue) initQueue,
     required TResult Function(double value) setVolume,
     required TResult Function() toggleMute,
     required TResult Function() toggleFullPlayer,
@@ -1315,8 +1298,8 @@ class _$MoveToInSong implements MoveToInSong {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? togglePlayPause,
-    TResult? Function(int index)? changeSong,
-    TResult? Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult? Function(Song song)? changeSong,
+    TResult? Function(SongQueue queue)? initQueue,
     TResult? Function(double value)? setVolume,
     TResult? Function()? toggleMute,
     TResult? Function()? toggleFullPlayer,
@@ -1331,8 +1314,8 @@ class _$MoveToInSong implements MoveToInSong {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? togglePlayPause,
-    TResult Function(int index)? changeSong,
-    TResult Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult Function(Song song)? changeSong,
+    TResult Function(SongQueue queue)? initQueue,
     TResult Function(double value)? setVolume,
     TResult Function()? toggleMute,
     TResult Function()? toggleFullPlayer,
@@ -1475,8 +1458,8 @@ class _$SongProgress implements SongProgress {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() togglePlayPause,
-    required TResult Function(int index) changeSong,
-    required TResult Function(List<Song> queue, int currentIndex) initQueue,
+    required TResult Function(Song song) changeSong,
+    required TResult Function(SongQueue queue) initQueue,
     required TResult Function(double value) setVolume,
     required TResult Function() toggleMute,
     required TResult Function() toggleFullPlayer,
@@ -1491,8 +1474,8 @@ class _$SongProgress implements SongProgress {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? togglePlayPause,
-    TResult? Function(int index)? changeSong,
-    TResult? Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult? Function(Song song)? changeSong,
+    TResult? Function(SongQueue queue)? initQueue,
     TResult? Function(double value)? setVolume,
     TResult? Function()? toggleMute,
     TResult? Function()? toggleFullPlayer,
@@ -1507,8 +1490,8 @@ class _$SongProgress implements SongProgress {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? togglePlayPause,
-    TResult Function(int index)? changeSong,
-    TResult Function(List<Song> queue, int currentIndex)? initQueue,
+    TResult Function(Song song)? changeSong,
+    TResult Function(SongQueue queue)? initQueue,
     TResult Function(double value)? setVolume,
     TResult Function()? toggleMute,
     TResult Function()? toggleFullPlayer,
@@ -1596,9 +1579,8 @@ mixin _$PlaybackState {
   bool get isPlaying => throw _privateConstructorUsedError;
   bool get isFullPlayerOn => throw _privateConstructorUsedError;
   SongWithProgress? get songWithProgress => throw _privateConstructorUsedError;
-  List<Song> get queue => throw _privateConstructorUsedError;
-  int get currentIndex => throw _privateConstructorUsedError;
   RepeatMode get repeatMode => throw _privateConstructorUsedError;
+  SongQueue get queue => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $PlaybackStateCopyWith<PlaybackState> get copyWith =>
@@ -1618,9 +1600,8 @@ abstract class $PlaybackStateCopyWith<$Res> {
       bool isPlaying,
       bool isFullPlayerOn,
       SongWithProgress? songWithProgress,
-      List<Song> queue,
-      int currentIndex,
-      RepeatMode repeatMode});
+      RepeatMode repeatMode,
+      SongQueue queue});
 
   $SongWithProgressCopyWith<$Res>? get songWithProgress;
 }
@@ -1644,9 +1625,8 @@ class _$PlaybackStateCopyWithImpl<$Res, $Val extends PlaybackState>
     Object? isPlaying = null,
     Object? isFullPlayerOn = null,
     Object? songWithProgress = freezed,
-    Object? queue = null,
-    Object? currentIndex = null,
     Object? repeatMode = null,
+    Object? queue = null,
   }) {
     return _then(_value.copyWith(
       volume: null == volume
@@ -1673,18 +1653,14 @@ class _$PlaybackStateCopyWithImpl<$Res, $Val extends PlaybackState>
           ? _value.songWithProgress
           : songWithProgress // ignore: cast_nullable_to_non_nullable
               as SongWithProgress?,
-      queue: null == queue
-          ? _value.queue
-          : queue // ignore: cast_nullable_to_non_nullable
-              as List<Song>,
-      currentIndex: null == currentIndex
-          ? _value.currentIndex
-          : currentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
       repeatMode: null == repeatMode
           ? _value.repeatMode
           : repeatMode // ignore: cast_nullable_to_non_nullable
               as RepeatMode,
+      queue: null == queue
+          ? _value.queue
+          : queue // ignore: cast_nullable_to_non_nullable
+              as SongQueue,
     ) as $Val);
   }
 
@@ -1716,9 +1692,8 @@ abstract class _$$_PlaybackStateCopyWith<$Res>
       bool isPlaying,
       bool isFullPlayerOn,
       SongWithProgress? songWithProgress,
-      List<Song> queue,
-      int currentIndex,
-      RepeatMode repeatMode});
+      RepeatMode repeatMode,
+      SongQueue queue});
 
   @override
   $SongWithProgressCopyWith<$Res>? get songWithProgress;
@@ -1741,9 +1716,8 @@ class __$$_PlaybackStateCopyWithImpl<$Res>
     Object? isPlaying = null,
     Object? isFullPlayerOn = null,
     Object? songWithProgress = freezed,
-    Object? queue = null,
-    Object? currentIndex = null,
     Object? repeatMode = null,
+    Object? queue = null,
   }) {
     return _then(_$_PlaybackState(
       volume: null == volume
@@ -1770,18 +1744,14 @@ class __$$_PlaybackStateCopyWithImpl<$Res>
           ? _value.songWithProgress
           : songWithProgress // ignore: cast_nullable_to_non_nullable
               as SongWithProgress?,
-      queue: null == queue
-          ? _value._queue
-          : queue // ignore: cast_nullable_to_non_nullable
-              as List<Song>,
-      currentIndex: null == currentIndex
-          ? _value.currentIndex
-          : currentIndex // ignore: cast_nullable_to_non_nullable
-              as int,
       repeatMode: null == repeatMode
           ? _value.repeatMode
           : repeatMode // ignore: cast_nullable_to_non_nullable
               as RepeatMode,
+      queue: null == queue
+          ? _value.queue
+          : queue // ignore: cast_nullable_to_non_nullable
+              as SongQueue,
     ));
   }
 }
@@ -1796,10 +1766,8 @@ class _$_PlaybackState implements _PlaybackState {
       this.isPlaying = false,
       this.isFullPlayerOn = false,
       this.songWithProgress,
-      final List<Song> queue = const [],
-      this.currentIndex = 0,
-      this.repeatMode = RepeatMode.noRepeat})
-      : _queue = queue;
+      this.repeatMode = RepeatMode.noRepeat,
+      required this.queue});
 
   /// Legal values are between 0 and 1.
   @override
@@ -1820,24 +1788,15 @@ class _$_PlaybackState implements _PlaybackState {
   final bool isFullPlayerOn;
   @override
   final SongWithProgress? songWithProgress;
-  final List<Song> _queue;
-  @override
-  @JsonKey()
-  List<Song> get queue {
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_queue);
-  }
-
-  @override
-  @JsonKey()
-  final int currentIndex;
   @override
   @JsonKey()
   final RepeatMode repeatMode;
+  @override
+  final SongQueue queue;
 
   @override
   String toString() {
-    return 'PlaybackState(volume: $volume, previousVolume: $previousVolume, isMuted: $isMuted, isPlaying: $isPlaying, isFullPlayerOn: $isFullPlayerOn, songWithProgress: $songWithProgress, queue: $queue, currentIndex: $currentIndex, repeatMode: $repeatMode)';
+    return 'PlaybackState(volume: $volume, previousVolume: $previousVolume, isMuted: $isMuted, isPlaying: $isPlaying, isFullPlayerOn: $isFullPlayerOn, songWithProgress: $songWithProgress, repeatMode: $repeatMode, queue: $queue)';
   }
 
   @override
@@ -1855,25 +1814,14 @@ class _$_PlaybackState implements _PlaybackState {
                 other.isFullPlayerOn == isFullPlayerOn) &&
             (identical(other.songWithProgress, songWithProgress) ||
                 other.songWithProgress == songWithProgress) &&
-            const DeepCollectionEquality().equals(other._queue, _queue) &&
-            (identical(other.currentIndex, currentIndex) ||
-                other.currentIndex == currentIndex) &&
             (identical(other.repeatMode, repeatMode) ||
-                other.repeatMode == repeatMode));
+                other.repeatMode == repeatMode) &&
+            (identical(other.queue, queue) || other.queue == queue));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      volume,
-      previousVolume,
-      isMuted,
-      isPlaying,
-      isFullPlayerOn,
-      songWithProgress,
-      const DeepCollectionEquality().hash(_queue),
-      currentIndex,
-      repeatMode);
+  int get hashCode => Object.hash(runtimeType, volume, previousVolume, isMuted,
+      isPlaying, isFullPlayerOn, songWithProgress, repeatMode, queue);
 
   @JsonKey(ignore: true)
   @override
@@ -1890,9 +1838,8 @@ abstract class _PlaybackState implements PlaybackState {
       final bool isPlaying,
       final bool isFullPlayerOn,
       final SongWithProgress? songWithProgress,
-      final List<Song> queue,
-      final int currentIndex,
-      final RepeatMode repeatMode}) = _$_PlaybackState;
+      final RepeatMode repeatMode,
+      required final SongQueue queue}) = _$_PlaybackState;
 
   @override
 
@@ -1911,11 +1858,9 @@ abstract class _PlaybackState implements PlaybackState {
   @override
   SongWithProgress? get songWithProgress;
   @override
-  List<Song> get queue;
-  @override
-  int get currentIndex;
-  @override
   RepeatMode get repeatMode;
+  @override
+  SongQueue get queue;
   @override
   @JsonKey(ignore: true)
   _$$_PlaybackStateCopyWith<_$_PlaybackState> get copyWith =>

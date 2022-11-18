@@ -3,14 +3,15 @@ import 'dart:io';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:myartist/src/shared/adapters/duration.dart';
-import 'package:myartist/src/shared/adapters/repeat_mode.dart';
-import 'package:myartist/src/shared/models/album.dart';
-import 'package:myartist/src/shared/models/artist.dart';
-import 'package:myartist/src/shared/models/playlist.dart';
-import 'package:myartist/src/shared/models/ranked.dart';
-import 'package:myartist/src/shared/models/song.dart';
-import 'package:myartist/src/shared/enums/hive_box.dart';
+import 'package:mkndn/src/shared/adapters/duration.dart';
+import 'package:mkndn/src/shared/adapters/objectid.dart';
+import 'package:mkndn/src/shared/adapters/repeat_mode.dart';
+import 'package:mkndn/src/shared/models/album.dart';
+import 'package:mkndn/src/shared/models/artist.dart';
+import 'package:mkndn/src/shared/models/playlist.dart';
+import 'package:mkndn/src/shared/models/ranked.dart';
+import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/enums/hive_box.dart';
 import 'package:universal_platform/universal_platform.dart';
 
 import 'src/shared/app.dart';
@@ -28,6 +29,7 @@ void main() async {
     ..registerAdapter(RankedAdapter())
     ..registerAdapter(DurationAdapter())
     ..registerAdapter(RepeatModeAdapter())
+    ..registerAdapter(ObjectIdAdapter())
     ..registerAdapter(PlaylistAdapter())
     ..registerAdapter(ArtistAdapter())
     ..registerAdapter(AlbumAdapter())

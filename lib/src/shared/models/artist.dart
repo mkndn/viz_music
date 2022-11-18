@@ -1,16 +1,17 @@
 import 'package:collection/collection.dart';
 import 'package:hive/hive.dart';
-import 'package:myartist/src/shared/models/ranked.dart';
+import 'package:mkndn/src/shared/models/ranked.dart';
+import 'package:objectid/objectid.dart';
 part 'artist.g.dart';
 
 @HiveType(typeId: 3)
 class Artist extends Ranked {
   @HiveField(0)
-  final String id;
+  final ObjectId id;
   @HiveField(1)
   final String name;
   @HiveField(2)
-  final List<String> albums;
+  final List<ObjectId> albums;
 
   Artist(
     DateTime dateAdded,

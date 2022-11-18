@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myartist/src/shared/classes/text_tile_content.dart';
-import 'package:myartist/src/shared/enums/display_type.dart';
-import 'package:myartist/src/shared/views/outlined_card.dart';
+import 'package:mkndn/src/shared/classes/text_tile_content.dart';
+import 'package:mkndn/src/shared/enums/display_type.dart';
+import 'package:mkndn/src/shared/views/outlined_card.dart';
 import '../extensions.dart';
 
 class TextTileMixin extends StatelessWidget {
@@ -51,7 +51,8 @@ class TextTileMixin extends StatelessWidget {
                   ),
                 ),
                 onTap: () => content.ref != null && redirectPrefix != null
-                    ? GoRouter.of(context).go('$redirectPrefix/${content.ref}')
+                    ? GoRouter.of(context)
+                        .go('$redirectPrefix/${content.ref!.hexString}')
                     : {},
               ),
             ],

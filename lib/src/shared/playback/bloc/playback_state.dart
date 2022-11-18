@@ -1,6 +1,6 @@
 part of 'playback_bloc.dart';
 
-@Freezed()
+@freezed
 class PlaybackState with _$PlaybackState {
   const factory PlaybackState({
     /// Legal values are between 0 and 1.
@@ -12,19 +12,18 @@ class PlaybackState with _$PlaybackState {
     @Default(false) bool isPlaying,
     @Default(false) bool isFullPlayerOn,
     SongWithProgress? songWithProgress,
-    @Default([]) List<Song> queue,
-    @Default(0) int currentIndex,
     @Default(RepeatMode.noRepeat) RepeatMode repeatMode,
+    required SongQueue queue,
   }) = _PlaybackState;
 
-  factory PlaybackState.initial() => const PlaybackState();
+  factory PlaybackState.initial() => PlaybackState(queue: SongQueue.instance());
   factory PlaybackState.load(PlayerStateModel initialData) {
     return PlaybackState.initial().copyWith(
-      currentIndex: initialData.currentIndex,
       songWithProgress: initialData.queue.isNotEmpty
           ? SongWithProgress(
               progress: initialData.progress,
-              song: initialData.queue[initialData.currentIndex])
+              song: initialData.queue.currentSong,
+            )
           : null,
       queue: initialData.queue,
       volume: initialData.volume,
@@ -38,7 +37,7 @@ class PlaybackState with _$PlaybackState {
 
 /// Helper which enforces our rule that our `song` and `progress` must either
 /// both be `null`, or both have a real value.
-@Freezed()
+@freezed
 class SongWithProgress with _$SongWithProgress {
   const factory SongWithProgress({
     required Duration progress,

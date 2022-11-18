@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:myartist/src/shared/models/song.dart';
-
-import '../playback/bloc/bloc.dart';
+import 'package:mkndn/src/shared/models/song.dart';
 import '../views/views.dart';
 
 /// Renders the child widget when not hovered and a Play button when hovered.
@@ -11,6 +8,7 @@ class HoverableSongPlayButton extends StatelessWidget {
     super.key,
     required this.song,
     required this.index,
+    required this.action,
     required this.child,
     this.size = const Size(50, 50),
     this.hoverMode = HoverMode.replace,
@@ -20,18 +18,16 @@ class HoverableSongPlayButton extends StatelessWidget {
   final Size size;
   final Song song;
   final int index;
+  final VoidCallback action;
   final HoverMode hoverMode;
 
   @override
   Widget build(BuildContext context) {
-    final PlaybackBloc bloc = BlocProvider.of<PlaybackBloc>(context);
     return HoverToggle(
       hoverChild: Center(
         child: GestureDetector(
           child: const Icon(Icons.play_arrow),
-          onTap: () => bloc.add(
-            PlaybackEvent.changeSong(index),
-          ),
+          onTap: action,
         ),
       ),
       mode: hoverMode,

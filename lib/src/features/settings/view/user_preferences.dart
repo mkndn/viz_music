@@ -1,9 +1,8 @@
-import 'package:adaptive_components/adaptive_components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myartist/src/shared/splash/bloc/splash_screen_bloc.dart';
-import 'package:myartist/src/shared/state/inmemory_media_manager.dart';
+import 'package:mkndn/src/shared/splash/bloc/splash_screen_bloc.dart';
+import 'package:mkndn/src/shared/state/inmemory_media_manager.dart';
 
 import '../../../shared/views/clickable.dart';
 
@@ -67,11 +66,26 @@ class _UserPreferencesState extends State<UserPreferences> {
               padding: const EdgeInsets.all(15),
               child: Row(
                 children: [
-                  const Text('Clear cache'),
+                  const Text('Reset Settings'),
                   const SizedBox(width: 50),
                   IconButton(
                     onPressed: () {
-                      state.reset();
+                      state.resetSettings();
+                    },
+                    icon: const Icon(Icons.settings_backup_restore),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: Row(
+                children: [
+                  const Text('Clear app data'),
+                  const SizedBox(width: 50),
+                  IconButton(
+                    onPressed: () {
+                      state.resetAppData();
                     },
                     icon: const Icon(Icons.delete_outline_rounded),
                   ),

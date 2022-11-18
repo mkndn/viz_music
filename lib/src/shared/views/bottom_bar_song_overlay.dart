@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:myartist/src/features/songs/view/song_list_mixin.dart';
-import 'package:myartist/src/shared/models/song.dart';
+import 'package:mkndn/src/features/songs/view/song_list_mixin.dart';
+import 'package:mkndn/src/shared/classes/song_queue.dart';
 
 class BottomBarSongOverlay extends StatelessWidget {
   const BottomBarSongOverlay(
-      {required this.parentSize,
-      required this.queue,
-      required this.currentSong,
-      super.key});
+      {required this.parentSize, required this.queue, super.key});
 
   final Size parentSize;
-  final List<Song> queue;
-  final Song? currentSong;
+  final SongQueue queue;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +22,7 @@ class BottomBarSongOverlay extends StatelessWidget {
             child: Scaffold(
               body: SingleChildScrollView(
                 padding: const EdgeInsets.all(15.0),
-                child: SongListMixin(songs: queue),
+                child: SongListMixin(queue: queue),
               ),
             ),
           ),

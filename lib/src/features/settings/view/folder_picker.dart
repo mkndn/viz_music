@@ -3,32 +3,23 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:myartist/src/shared/classes/folder.dart';
-import 'package:myartist/src/shared/enums/state.dart';
+import 'package:mkndn/src/shared/classes/classes.dart';
+import 'package:mkndn/src/shared/enums/state.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../shared/providers/preferences.dart';
 import '../../../shared/views/outlined_card.dart';
 
 class FolderInfo {
-  bool edited;
   Directory? rootDir;
   List<Folder> folders;
-  FolderInfo(this.edited, this.rootDir, this.folders);
+  FolderInfo(this.rootDir, this.folders);
 }
 
 class FolderPicker extends StatefulWidget {
-  const FolderPicker(
-      {required this.mode,
-      required this.data,
-      required this.rootDir,
-      required this.folders,
-      super.key});
+  const FolderPicker({required this.mode, super.key});
 
   final FolderMode mode;
-  final Future<FolderInfo> data;
-  final Future<Directory?> rootDir;
-  final List<Folder> folders;
 
   @override
   State<FolderPicker> createState() => _FolderPickerState();
@@ -36,11 +27,51 @@ class FolderPicker extends StatefulWidget {
 
 class _FolderPickerState extends State<FolderPicker> {
   final Preferences _prefs = Preferences();
+  late Future<List<Folder>> _folders;
+  late Future<Directory?> _rootDir;
+  double height = 0.0;
 
-  Future<void> _savePrefs() async {
-    List<String> folderContents =
-        widget.folders.map((e) => jsonEncode(e.toJson())).toList();
-    await _prefs.setStringList(widget.mode.text, folderContents);
+  @override
+  void initState() {
+    super.initState();
+    height = 200.0;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadFolderPrefs();
+      _prepareStorage();
+    });
+  }
+
+  Future<void> _loadFolderPrefs() async {
+    setState(() {
+      _folders =
+          _prefs.getStringList(widget.mode.text).then((folderConfigContent) {
+        return folderConfigContent.map((element) {
+          return Folder.fromJson(jsonDecode(element));
+        }).toList();
+      }).then((value) {
+        if (value.isNotEmpty) {
+          height = determineScrollHeight(
+              value.length, MediaQuery.of(context).size.height * 0.5);
+        }
+        return value;
+      });
+    });
+  }
+
+  Future<void> _savePrefs(List<Folder> folders) async {
+    List<String> folderContent =
+        folders.map((e) => jsonEncode(e.toJson())).toList();
+    await _prefs.setStringList(widget.mode.text, folderContent);
+  }
+
+  Future<void> _prepareStorage() async {
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      _rootDir = getDownloadsDirectory();
+    } else if (Platform.isAndroid || Platform.isIOS) {
+      _rootDir = getExternalStorageDirectory();
+    } else {
+      _rootDir = getTemporaryDirectory();
+    }
   }
 
   Future<void> _selectDir(Directory? dir) async {
@@ -49,18 +80,62 @@ class _FolderPickerState extends State<FolderPicker> {
       dialogTitle: 'Select folder',
       initialDirectory: rootDir.path,
     );
+    setState(() {
+      if (path != null && path.isNotEmpty) {
+        _folders = _folders.then((value) {
+          List<Folder> newList = List.from(value);
+          newList.add(Folder(path: path));
+          _savePrefs(newList);
+          return newList;
+        }).then((value) {
+          if (value.isNotEmpty) {
+            height = determineScrollHeight(
+                value.length, MediaQuery.of(context).size.height * 0.5);
+          }
+          return value;
+        });
+      }
+    });
+  }
+
+  Future<void> _removeDir(String? path) async {
     if (path != null && path.isNotEmpty) {
-      widget.folders.add(Folder(path: path));
+      setState(() {
+        _folders = _folders.then((value) {
+          List<Folder> newList = List.from(value);
+          newList.removeWhere((element) => element.path == path);
+          _savePrefs(newList);
+          return newList;
+        }).then((value) {
+          if (value.isNotEmpty) {
+            height = determineScrollHeight(
+                value.length, MediaQuery.of(context).size.height * 0.5);
+          }
+          return value;
+        });
+      });
     }
+  }
+
+  Future<FolderInfo> _getData() async {
+    List<Folder> folders = await _folders;
+    Directory? rootDir = await _rootDir;
+    return FolderInfo(rootDir, folders);
+  }
+
+  double determineScrollHeight(int foldersCount, double maxHeight) {
+    if (foldersCount * 200.0 > maxHeight) {
+      return maxHeight - 50;
+    }
+    return foldersCount * 200.0;
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) => SingleChildScrollView(
-        primary: false,
         child: FutureBuilder<FolderInfo>(
-          future: widget.data,
+          future: _getData(),
           builder: (context, snapshot) => Padding(
               padding: const EdgeInsets.all(15),
               child: Column(
@@ -79,34 +154,43 @@ class _FolderPickerState extends State<FolderPicker> {
                       ),
                     ],
                   ),
-                  SizedBox(
-                    height: snapshot.data != null
-                        ? snapshot.data!.folders.length * 200
-                        : 100,
-                    child: OutlinedCard(
-                      child: ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        padding: const EdgeInsets.all(15),
-                        itemCount: snapshot.data?.folders.length,
-                        itemBuilder: (context, index) => Padding(
-                          padding: const EdgeInsets.all(15),
-                          child: Text(snapshot.data?.folders[index].path ?? ''),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ElevatedButton(
-                        autofocus: snapshot.data?.edited ?? false,
-                        onPressed: snapshot.data?.edited ?? false
-                            ? () => _savePrefs()
-                            : () {},
-                        child: const Text('Save'),
+                      OutlinedCard(
+                        child: Container(
+                          height: height,
+                          width: constraints.maxWidth * 0.95,
+                          padding: const EdgeInsets.all(5.0),
+                          child: ListView.builder(
+                            scrollDirection: Axis.vertical,
+                            padding: const EdgeInsets.all(15),
+                            itemCount: snapshot.data != null
+                                ? snapshot.data!.folders.length
+                                : 0,
+                            itemBuilder: (context, index) => Padding(
+                              padding: const EdgeInsets.all(15),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                        snapshot.data?.folders[index].path ??
+                                            ''),
+                                  ),
+                                  SizedBox(
+                                    width: 50,
+                                  ),
+                                  IconButton(
+                                    onPressed: () => _removeDir(
+                                        snapshot.data?.folders[index].path),
+                                    icon: Icon(Icons.remove_circle_outline),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),

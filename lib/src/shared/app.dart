@@ -1,9 +1,9 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:myartist/src/shared/providers/providers.dart';
-import 'package:myartist/src/shared/state/inmemory_media_manager.dart';
-import 'package:myartist/src/shared/state/inmemory_state_manager.dart';
+import 'package:mkndn/src/shared/providers/providers.dart';
+import 'package:mkndn/src/shared/state/inmemory_media_manager.dart';
+import 'package:mkndn/src/shared/state/inmemory_state_manager.dart';
 
 import 'splash/bloc/splash_screen_bloc.dart';
 import 'playback/bloc/bloc.dart';

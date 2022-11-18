@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myartist/src/features/artists/view/artist_list.dart';
-import 'package:myartist/src/shared/enums/hive_box.dart';
-import 'package:myartist/src/shared/state/inmemory_media_manager.dart';
+import 'package:mkndn/src/features/artists/view/artist_list.dart';
+import 'package:mkndn/src/shared/enums/hive_box.dart';
+import 'package:mkndn/src/shared/state/inmemory_media_manager.dart';
 
 import '../features/albums/albums.dart';
 import '../features/artists/artists.dart';
@@ -216,7 +216,7 @@ final appRouter = GoRouter(
       routes: [
         GoRoute(
           path: 'folders',
-          pageBuilder: (context, state) => const MaterialPage<void>(
+          pageBuilder: (context, state) => MaterialPage<void>(
             child: FolderConfig(),
           ),
         )

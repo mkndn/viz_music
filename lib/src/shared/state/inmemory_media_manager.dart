@@ -4,15 +4,16 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
-import 'package:myartist/src/shared/classes/classes.dart';
-import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/enums/hive_box.dart';
-import 'package:myartist/src/shared/extensions.dart';
-import 'package:myartist/src/shared/models/album.dart';
-import 'package:myartist/src/shared/models/artist.dart';
-import 'package:myartist/src/shared/models/song.dart';
-import 'package:myartist/src/shared/providers/preferences.dart';
-import 'package:myartist/src/shared/services/disk_media_store_manager.dart';
+import 'package:mkndn/src/shared/classes/classes.dart';
+import 'package:mkndn/src/shared/enums/hive_box.dart';
+import 'package:mkndn/src/shared/enums/state.dart';
+import 'package:mkndn/src/shared/mixins/folder.dart';
+import 'package:mkndn/src/shared/models/album.dart';
+import 'package:mkndn/src/shared/models/artist.dart';
+import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/providers/preferences.dart';
+import 'package:mkndn/src/shared/services/disk_media_store_manager.dart';
+import 'package:objectid/objectid.dart';
 
 class InMemoryMediaManager extends StatefulWidget {
   final Widget child;
@@ -30,7 +31,8 @@ class InMemoryMediaManager extends StatefulWidget {
   State<InMemoryMediaManager> createState() => InMemoryMediaManagerState();
 }
 
-class InMemoryMediaManagerState extends State<InMemoryMediaManager> {
+class InMemoryMediaManagerState extends State<InMemoryMediaManager>
+    with FolderMixin {
   MediaContent content = MediaContent();
   final DiskMediaStoreManager _diskMediaManager =
       DiskMediaStoreManager.instance();
@@ -42,39 +44,41 @@ class InMemoryMediaManagerState extends State<InMemoryMediaManager> {
       .toList();
 
   Future<void> _reload() async {
-    await _prefs.getStringList('Folders.included').then((paths) async {
-      final List<Future<MediaContent>> mediaContentFutureList =
-          List.empty(growable: true);
-      for (var element in paths) {
-        List<Future<Metadata>> songMetadataList = List.empty(growable: true);
-        List<FileSystemEntity> entities = getEntities(element);
-        for (var element in entities) {
-          songMetadataList.add(MetadataRetriever.fromFile(File(element.path)));
-        }
-        if (songMetadataList.isNotEmpty) {
-          _prefs.setBool(element, true);
-          mediaContentFutureList
-              .add(_diskMediaManager.generate(songMetadataList));
-        }
+    final List<Future<MediaContent>> mediaContentFutureList =
+        List.empty(growable: true);
+    deSerialiseFolders(await _prefs.getStringList(FolderMode.included.text))
+        .forEach((folder) async {
+      List<Future<Metadata>> songMetadataList = List.empty(growable: true);
+      List<FileSystemEntity> entities = getEntities(folder.path);
+      for (var element in entities) {
+        songMetadataList.add(MetadataRetriever.fromFile(File(element.path)));
       }
+      if (songMetadataList.isNotEmpty) {
+        updateFolderInPrefs(folder.copyWith(hasContent: false));
+        mediaContentFutureList
+            .add(_diskMediaManager.generate(songMetadataList));
+      }
+    });
 
-      await Future.wait(mediaContentFutureList).then((mediaContentList) async {
-        update(mediaContentList.last);
-      });
+    await Future.wait(mediaContentFutureList).then((mediaContentList) async {
+      update(mediaContentList.last);
     });
   }
 
-  Future<bool> isFolderIntact() async {
-    List<String> paths = await _prefs.getStringList('Folders.included');
-    return paths
-        .map((e) => Folder.fromJson(jsonDecode(e)))
-        .where((element) => element.hasContent)
-        .where((element) => getEntities(element.path).length > 0)
-        .isNotEmpty;
+  void updateFolderInPrefs(Folder folder) async {
+    _prefs.setStringList(
+        FolderMode.included.text,
+        updateFolder(await _prefs.getStringList(FolderMode.included.text),
+            folder.path, (f) => folder.copyWith(hasContent: true)));
+  }
+
+  Future<bool> areFolderConfigIntact() async {
+    return areFoldersIntact(await _prefs.getStringList('Folders.included'),
+        (path) => getEntities(path).length > 0);
   }
 
   Future<void> init() async {
-    bool folderIntact = await isFolderIntact();
+    bool folderIntact = await areFolderConfigIntact();
     if (folderIntact) {
       MediaContent content = _diskMediaManager.loadData();
       if (content.hasContent) {
@@ -86,14 +90,17 @@ class InMemoryMediaManagerState extends State<InMemoryMediaManager> {
   }
 
   Future<void> refresh() async {
-    reset();
+    resetAppData();
     await _reload();
   }
 
-  Future<void> reset() async {
+  Future<void> resetAppData() async {
     await _diskMediaManager.resetAll();
-    await _prefs.reset();
     update(MediaContent());
+  }
+
+  Future<void> resetSettings() async {
+    await _prefs.reset();
   }
 
   void update(MediaContent mediaContent) {
@@ -102,7 +109,7 @@ class InMemoryMediaManagerState extends State<InMemoryMediaManager> {
     });
   }
 
-  void rankMedia(String songId) {
+  void rankMedia(ObjectId songId) {
     int matchedIndex = content.songs.indexWhere((song) => song.id == songId);
     if (matchedIndex >= 0) {
       Song matched = content.songs.elementAt(matchedIndex);
@@ -120,7 +127,7 @@ class InMemoryMediaManagerState extends State<InMemoryMediaManager> {
     content.songs.setAll(index, [song]);
   }
 
-  void rankAlbum(String id) {
+  void rankAlbum(ObjectId id) {
     int matchedIndex = content.albums.indexWhere((song) => song.id == id);
     if (matchedIndex >= 0) {
       Album matched = content.albums.elementAt(matchedIndex);
@@ -131,7 +138,7 @@ class InMemoryMediaManagerState extends State<InMemoryMediaManager> {
     }
   }
 
-  void rankArtist(String id) {
+  void rankArtist(ObjectId id) {
     int matchedIndex = content.artists.indexWhere((song) => song.id == id);
     if (matchedIndex >= 0) {
       Artist matched = content.artists.elementAt(matchedIndex);

@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
-import 'package:myartist/src/shared/models/album.dart';
-import 'package:myartist/src/shared/models/artist.dart';
-import 'package:myartist/src/shared/models/playlist.dart';
-import 'package:myartist/src/shared/models/song.dart';
-import 'package:myartist/src/shared/enums/sorting.dart';
+import 'package:mkndn/src/shared/models/album.dart';
+import 'package:mkndn/src/shared/models/artist.dart';
+import 'package:mkndn/src/shared/models/playlist.dart';
+import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/enums/sorting.dart';
 
 mixin MediaSorting {
   List<Song> sortSongsByMixin(List<Song> songs, SongSortField sorting) {
@@ -49,7 +49,6 @@ mixin MediaSorting {
         return albums.sorted((a, b) => a.listenCount.compareTo(b.listenCount));
       default:
         return albums.sorted((a, b) => a.title.compareTo(b.title));
-        ;
     }
   }
 

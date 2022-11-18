@@ -1,11 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:myartist/src/shared/models/album.dart';
-import 'package:myartist/src/shared/models/artist.dart';
-import 'package:myartist/src/shared/models/playlist.dart';
-import 'package:myartist/src/shared/models/song.dart';
-import 'package:myartist/src/shared/enums/sorting.dart';
-import 'package:myartist/src/shared/mixins/media_sorting.dart';
+import 'package:mkndn/src/shared/models/album.dart';
+import 'package:mkndn/src/shared/models/artist.dart';
+import 'package:mkndn/src/shared/models/playlist.dart';
+import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/enums/sorting.dart';
+import 'package:mkndn/src/shared/mixins/media_sorting.dart';
+import 'package:objectid/objectid.dart';
 
 class MediaContent with MediaSorting {
   final List<Song> _songs;
@@ -53,11 +54,11 @@ class MediaContent with MediaSorting {
     return sortSongsByMixin(this._songs, sorting).reversed.toList();
   }
 
-  Song? getSongById(String id) {
+  Song? getSongById(ObjectId id) {
     return this._songs.firstWhereOrNull((element) => element.id == id);
   }
 
-  List<Song> getSongsById(List<String> ids) {
+  List<Song> getSongsById(List<ObjectId> ids) {
     return this
         ._songs
         .where((element) => ids.contains(element.id))
@@ -66,11 +67,11 @@ class MediaContent with MediaSorting {
         .toList();
   }
 
-  void removeSongById(String id) {
+  void removeSongById(ObjectId id) {
     this._songs.removeWhere((element) => element.id == id);
   }
 
-  void removeSongsById(List<String> ids) {
+  void removeSongsById(List<ObjectId> ids) {
     this._songs.removeWhere((element) => ids.contains(element.id));
   }
 
@@ -88,11 +89,11 @@ class MediaContent with MediaSorting {
     return sortAlbumsByMixin(this._albums, sorting).reversed.toList();
   }
 
-  Album? getAlbumById(String id) {
+  Album? getAlbumById(ObjectId id) {
     return this._albums.firstWhereOrNull((album) => album.id == id);
   }
 
-  List<Album> getAlbumsById(List<String> ids) {
+  List<Album> getAlbumsById(List<ObjectId> ids) {
     return this
         ._albums
         .where((album) => ids.contains(album.id))
@@ -101,11 +102,11 @@ class MediaContent with MediaSorting {
         .toList();
   }
 
-  void removeAlbumById(String id) {
+  void removeAlbumById(ObjectId id) {
     this._albums.removeWhere((element) => element.id == id);
   }
 
-  void removeAlbumsById(List<String> ids) {
+  void removeAlbumsById(List<ObjectId> ids) {
     this._albums.removeWhere((element) => ids.contains(element.id));
   }
 
@@ -124,11 +125,11 @@ class MediaContent with MediaSorting {
     return sortArtistsByMixin(this._artists, sorting).reversed.toList();
   }
 
-  Artist? getArtistById(String id) {
+  Artist? getArtistById(ObjectId id) {
     return this._artists.firstWhereOrNull((element) => element.id == id);
   }
 
-  List<Artist> getArtistsById(List<String> ids) {
+  List<Artist> getArtistsById(List<ObjectId> ids) {
     return this
         ._artists
         .where((element) => ids.contains(element.id))
@@ -137,11 +138,11 @@ class MediaContent with MediaSorting {
         .toList();
   }
 
-  void removeArtistById(String id) {
+  void removeArtistById(ObjectId id) {
     this._artists.removeWhere((element) => element.id == id);
   }
 
-  void removeArtistsById(List<String> ids) {
+  void removeArtistsById(List<ObjectId> ids) {
     this._artists.removeWhere((element) => ids.contains(element.id));
   }
 
@@ -160,11 +161,11 @@ class MediaContent with MediaSorting {
     return sortPlaylistsByMixin(this._playlists, sorting).reversed.toList();
   }
 
-  Playlist? getPlaylistById(String id) {
+  Playlist? getPlaylistById(ObjectId id) {
     return this._playlists.firstWhereOrNull((playlist) => playlist.id == id);
   }
 
-  List<Playlist> getPlaylistsByIds(List<String> ids) {
+  List<Playlist> getPlaylistsByIds(List<ObjectId> ids) {
     return this
         ._playlists
         .where((playlist) => ids.contains(playlist.id))
@@ -173,11 +174,11 @@ class MediaContent with MediaSorting {
         .toList();
   }
 
-  void removePlaylistById(String id) {
+  void removePlaylistById(ObjectId id) {
     this._playlists.removeWhere((playlist) => playlist.id == id);
   }
 
-  void removePlaylistsById(List<String> ids) {
+  void removePlaylistsById(List<ObjectId> ids) {
     this._playlists.removeWhere((playlist) => ids.contains(playlist.id));
   }
 
@@ -185,6 +186,8 @@ class MediaContent with MediaSorting {
     return this
         ._songs
         .sorted((a, b) => a.listenCount.compareTo(b.listenCount))
+        .reversed
+        .toList()
         .slice(0, 5)
         .whereNotNull()
         .sorted((a, b) => a.title.compareTo(b.title))
@@ -195,6 +198,8 @@ class MediaContent with MediaSorting {
     return this
         ._songs
         .sorted((a, b) => a.dateAdded.compareTo(b.dateAdded))
+        .reversed
+        .toList()
         .slice(0, 5)
         .whereNotNull()
         .sorted((a, b) => a.title.compareTo(b.title))
@@ -206,6 +211,8 @@ class MediaContent with MediaSorting {
         ._songs
         .where((element) => element.dateLastListened != null)
         .sorted((a, b) => a.dateLastListened!.compareTo(b.dateLastListened!))
+        .reversed
+        .toList()
         .slice(0, 5)
         .whereNotNull()
         .sorted((a, b) => a.title.compareTo(b.title))
@@ -216,6 +223,8 @@ class MediaContent with MediaSorting {
     return this
         ._albums
         .sorted((a, b) => a.listenCount.compareTo(b.listenCount))
+        .reversed
+        .toList()
         .slice(0, 5)
         .whereNotNull()
         .sorted((a, b) => a.title.compareTo(b.title))
@@ -226,6 +235,8 @@ class MediaContent with MediaSorting {
     return this
         ._artists
         .sorted((a, b) => a.listenCount.compareTo(b.listenCount))
+        .reversed
+        .toList()
         .slice(0, 5)
         .whereNotNull()
         .sorted((a, b) => a.name.compareTo(b.name))

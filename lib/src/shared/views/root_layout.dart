@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart' as go;
-import 'package:myartist/src/shared/services/disk_state_storage_manager.dart';
-import 'package:myartist/src/shared/state/inmemory_media_manager.dart';
+import 'package:mkndn/src/shared/services/disk_state_storage_manager.dart';
+import 'package:mkndn/src/shared/state/inmemory_media_manager.dart';
 import 'package:universal_platform/universal_platform.dart';
 
 import '../playback/bloc/bloc.dart';

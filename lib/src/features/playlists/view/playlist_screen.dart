@@ -1,10 +1,12 @@
 import 'package:adaptive_components/adaptive_components.dart';
 import 'package:flutter/material.dart';
-import 'package:myartist/src/features/songs/view/song_list_mixin.dart';
-import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/models/playlist.dart';
-import 'package:myartist/src/shared/extensions.dart';
-import 'package:myartist/src/shared/views/brightness_toggle.dart';
+import 'package:mkndn/src/features/songs/view/song_list_mixin.dart';
+import 'package:mkndn/src/shared/classes/media_content.dart';
+import 'package:mkndn/src/shared/classes/song_queue.dart';
+import 'package:mkndn/src/shared/models/playlist.dart';
+import 'package:mkndn/src/shared/extensions.dart';
+import 'package:mkndn/src/shared/views/brightness_toggle.dart';
+import 'package:objectid/objectid.dart';
 
 class PlaylistScreen extends StatelessWidget {
   const PlaylistScreen(
@@ -15,7 +17,8 @@ class PlaylistScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Playlist? playlist = mediaContent.getPlaylistById(id);
+    Playlist? playlist =
+        mediaContent.getPlaylistById(ObjectId.fromHexString(id));
     return LayoutBuilder(
       builder: (context, constraints) {
         if (playlist == null) {
@@ -68,7 +71,9 @@ class PlaylistScreen extends StatelessWidget {
                     child: SingleChildScrollView(
                       scrollDirection: Axis.vertical,
                       child: SongListMixin(
-                        songs: mediaContent.getSongsById(playlist.songs),
+                        queue: SongQueue.init(
+                            mediaContent.getSongsById(playlist.songs),
+                            playlist.songs[0]),
                       ),
                     ),
                   ),

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:myartist/src/features/home/view/home_screen_desktop.dart';
-import 'package:myartist/src/features/home/view/home_screen_mobile.dart';
-import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/state/inmemory_media_manager.dart';
-import 'package:myartist/src/shared/extensions.dart';
-import 'package:myartist/src/shared/splash/bloc/splash_screen.dart';
-import 'package:myartist/src/shared/splash/bloc/splash_screen_bloc.dart';
-import 'package:myartist/src/shared/state/inmemory_state_manager.dart';
+import 'package:mkndn/src/features/home/view/home_screen_desktop.dart';
+import 'package:mkndn/src/features/home/view/home_screen_mobile.dart';
+import 'package:mkndn/src/shared/classes/media_content.dart';
+import 'package:mkndn/src/shared/state/inmemory_media_manager.dart';
+import 'package:mkndn/src/shared/extensions.dart';
+import 'package:mkndn/src/shared/splash/bloc/splash_screen.dart';
+import 'package:mkndn/src/shared/splash/bloc/splash_screen_bloc.dart';
+import 'package:mkndn/src/shared/state/inmemory_state_manager.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({required this.mediaContent, super.key});
@@ -26,15 +26,20 @@ class _HomeScreenState extends State<HomeScreen> {
     InMemoryMediaManagerState mediaState,
     Function bloc,
   ) async {
-    isFolderIntact = await mediaState.isFolderIntact();
-    if (!widget.mediaContent.hasContent && isFolderIntact) {
+    isFolderIntact = await mediaState.areFolderConfigIntact();
+    if (isFolderIntact) {
       bloc().add(const SplashScreenEvent.showSplashScreen());
-      await mediaState.init().whenComplete(
-            (() => {
-                  appState.updateState(updatedState: true),
-                  bloc().add(const SplashScreenEvent.naviagteToHomeScreen()),
-                }),
-          );
+      if (!widget.mediaContent.hasContent) {
+        await mediaState.init().whenComplete(
+              (() => {
+                    appState.updateState(updatedState: true),
+                    bloc().add(const SplashScreenEvent.naviagteToHomeScreen()),
+                  }),
+            );
+      } else {
+        appState.updateState(updatedState: true);
+        bloc().add(const SplashScreenEvent.naviagteToHomeScreen());
+      }
     }
   }
 

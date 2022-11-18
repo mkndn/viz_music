@@ -1,10 +1,12 @@
 import 'package:adaptive_components/adaptive_components.dart';
 import 'package:flutter/material.dart';
-import 'package:myartist/src/features/songs/view/song_list_mixin.dart';
-import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/extensions.dart';
-import 'package:myartist/src/shared/views/brightness_toggle.dart';
-import 'package:myartist/src/shared/views/image_tile.dart';
+import 'package:mkndn/src/features/songs/view/song_list_mixin.dart';
+import 'package:mkndn/src/shared/classes/media_content.dart';
+import 'package:mkndn/src/shared/classes/song_queue.dart';
+import 'package:mkndn/src/shared/extensions.dart';
+import 'package:mkndn/src/shared/views/brightness_toggle.dart';
+import 'package:mkndn/src/shared/views/image_tile.dart';
+import 'package:objectid/objectid.dart';
 
 import '../../../shared/models/album.dart';
 
@@ -16,7 +18,7 @@ class AlbumScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Album? album = info.getAlbumById(id);
+    Album? album = info.getAlbumById(ObjectId.fromHexString(id));
     return LayoutBuilder(
       builder: (context, constraints) {
         if (album == null) {
@@ -40,11 +42,9 @@ class AlbumScreen extends StatelessWidget {
           child: Scaffold(
             primary: false,
             appBar: AppBar(
-              title: Expanded(
-                child: Text(
-                  '${album.title}',
-                  style: context.displaySmall,
-                ),
+              title: Text(
+                '${album.title}',
+                style: context.displaySmall,
               ),
               actions: [
                 const Padding(
@@ -81,7 +81,9 @@ class AlbumScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 20),
                     child: SongListMixin(
-                      songs: info.getSongsById(album.songsInAlbum),
+                      queue: SongQueue.init(
+                          info.getSongsById(album.songsInAlbum),
+                          album.songsInAlbum[0]),
                     ),
                   ),
                 ),

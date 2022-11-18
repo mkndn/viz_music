@@ -1,15 +1,15 @@
-class Folder {
-  final String path;
-  bool hasContent;
+import 'package:freezed_annotation/freezed_annotation.dart';
+part 'folder.freezed.dart';
+part 'folder.g.dart';
 
-  Folder({required this.path, this.hasContent = false});
+@freezed
+class Folder with _$Folder {
+  const factory Folder({
+    @Default('') String path,
+    @Default(false) bool hasContent,
+  }) = _Folder;
 
-  Folder.fromJson(Map<String, dynamic> json)
-      : path = json['path'] as String,
-        hasContent = json['has_content'] as bool;
+  factory Folder.initial() => Folder();
 
-  Map<String, dynamic> toJson() => {
-        'path': path,
-        'has_content': hasContent,
-      };
+  factory Folder.fromJson(Map<String, dynamic> json) => _$FolderFromJson(json);
 }

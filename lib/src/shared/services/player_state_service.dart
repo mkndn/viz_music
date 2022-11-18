@@ -1,8 +1,8 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:myartist/src/shared/enums/hive_box.dart';
-import 'package:myartist/src/shared/services/hive_services.dart';
+import 'package:mkndn/src/shared/enums/hive_box.dart';
+import 'package:mkndn/src/shared/services/hive_services.dart';
 
-class PlayerStateService extends HiveService<dynamic> {
+class PlayerStateService extends HiveService<String, dynamic> {
   final Box<dynamic> _box;
 
   PlayerStateService._(this._box);

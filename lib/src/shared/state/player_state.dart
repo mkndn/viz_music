@@ -1,9 +1,8 @@
-import 'package:myartist/src/shared/models/song.dart';
-import 'package:myartist/src/shared/enums/repeat_mode.dart';
+import 'package:mkndn/src/shared/classes/song_queue.dart';
+import 'package:mkndn/src/shared/enums/repeat_mode.dart';
 
 class PlayerStateModel {
-  List<Song> queue;
-  int currentIndex;
+  SongQueue queue;
   Duration progress;
   double volume;
   double? previousVolume;
@@ -14,7 +13,6 @@ class PlayerStateModel {
 
   PlayerStateModel({
     required this.queue,
-    required this.currentIndex,
     this.previousVolume,
     Duration? progressParam,
     double? volumeParam,

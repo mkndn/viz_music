@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:myartist/src/shared/views/brightness_toggle.dart';
+import 'package:mkndn/src/shared/views/brightness_toggle.dart';
 
 import '../../../shared/models/album.dart';
 import '../../../shared/views/grid_view_mixin.dart';

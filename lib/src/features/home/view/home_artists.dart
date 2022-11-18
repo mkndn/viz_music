@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myartist/src/shared/models/artist.dart';
+import 'package:mkndn/src/shared/models/artist.dart';
 
 import '../../../shared/extensions.dart';
 
@@ -41,10 +41,6 @@ class HomeArtists extends StatelessWidget {
         maxLines: 2,
         style: context.labelLarge,
         overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-        child: Text(artist.name, style: context.labelMedium),
       ),
       onTap: () => GoRouter.of(context).go('/artists/${artist.id}'),
     );

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/models/song.dart';
-import 'package:myartist/src/shared/enums/display_type.dart';
-import 'package:myartist/src/shared/enums/sort_mode.dart';
-import 'package:myartist/src/shared/enums/sorting.dart';
-import 'package:myartist/src/shared/enums/state.dart';
-import 'package:myartist/src/shared/extensions.dart';
-import 'package:myartist/src/shared/providers/preferences.dart';
-import 'package:myartist/src/shared/splash/bloc/splash_screen.dart';
-import 'package:myartist/src/shared/splash/bloc/splash_screen_bloc.dart';
-import 'package:myartist/src/shared/views/brightness_toggle.dart';
-import 'package:myartist/src/shared/views/search.dart';
+import 'package:mkndn/src/shared/classes/media_content.dart';
+import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/enums/display_type.dart';
+import 'package:mkndn/src/shared/enums/sort_mode.dart';
+import 'package:mkndn/src/shared/enums/sorting.dart';
+import 'package:mkndn/src/shared/enums/state.dart';
+import 'package:mkndn/src/shared/extensions.dart';
+import 'package:mkndn/src/shared/playback/bloc/playback_bloc.dart';
+import 'package:mkndn/src/shared/providers/preferences.dart';
+import 'package:mkndn/src/shared/splash/bloc/splash_screen.dart';
+import 'package:mkndn/src/shared/splash/bloc/splash_screen_bloc.dart';
+import 'package:mkndn/src/shared/views/brightness_toggle.dart';
+import 'package:mkndn/src/shared/views/search.dart';
 
 import 'song_content_mixin.dart';
 
@@ -230,7 +231,7 @@ class _SongListScreenState extends State<SongListScreen> {
           ),
           body: SongContentMixin(
             mediaContent: widget.mediaContent,
-            songs: this.songs,
+            queue: BlocProvider.of<PlaybackBloc>(context).state.queue,
             constraints: constraints,
             display: constraints.isMobile ? DisplayType.LIST : DisplayType.GRID,
           ),

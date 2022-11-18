@@ -20,9 +20,9 @@ class ArtistAdapter extends TypeAdapter<Artist> {
       fields[8] as DateTime,
       fields[9] as DateTime?,
       fields[7] as int,
-      id: fields[0] as String,
+      id: fields[0] as ObjectId,
       name: fields[1] as String,
-      albums: (fields[2] as List).cast<String>(),
+      albums: (fields[2] as List).cast<ObjectId>(),
     );
   }
 

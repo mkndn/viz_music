@@ -20,10 +20,10 @@ class PlaylistAdapter extends TypeAdapter<Playlist> {
       fields[8] as DateTime,
       fields[9] as DateTime?,
       fields[7] as int,
-      id: fields[0] as String,
+      id: fields[0] as ObjectId,
       title: fields[1] as String,
       cover: fields[3] as Uint8List,
-      songs: (fields[4] as List).cast<String>(),
+      songs: (fields[4] as List).cast<ObjectId>(),
       description: fields[2] as String,
     );
   }

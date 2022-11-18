@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myartist/src/shared/models/playlist.dart';
+import 'package:mkndn/src/shared/models/playlist.dart';
+import 'package:objectid/objectid.dart';
 import '../extensions.dart';
 import 'image_clipper.dart';
 
@@ -97,7 +98,7 @@ class _PlaylistNavItem extends StatefulWidget {
   });
 
   final Uint8List image;
-  final String playlistId;
+  final ObjectId playlistId;
   final String title;
 
   @override

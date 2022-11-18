@@ -1,9 +1,10 @@
 import 'package:hive/hive.dart';
-import 'package:myartist/src/shared/models/song.dart';
-import 'package:myartist/src/shared/enums/hive_box.dart';
-import 'package:myartist/src/shared/services/hive_services.dart';
+import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/enums/hive_box.dart';
+import 'package:mkndn/src/shared/services/hive_services.dart';
+import 'package:objectid/objectid.dart';
 
-class SongService extends HiveService<Song> {
+class SongService extends HiveService<ObjectId, Song> {
   final Box<Song> _box;
 
   SongService._(this._box);

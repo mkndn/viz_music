@@ -2,13 +2,14 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
-import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/mixins/utils.dart';
-import 'package:myartist/src/shared/services/album_services.dart';
-import 'package:myartist/src/shared/services/artist_services.dart';
-import 'package:myartist/src/shared/services/hive_services.dart';
-import 'package:myartist/src/shared/services/playlist_services.dart';
-import 'package:myartist/src/shared/services/song_services.dart';
+import 'package:mkndn/src/shared/classes/media_content.dart';
+import 'package:mkndn/src/shared/mixins/utils.dart';
+import 'package:mkndn/src/shared/services/album_services.dart';
+import 'package:mkndn/src/shared/services/artist_services.dart';
+import 'package:mkndn/src/shared/services/hive_services.dart';
+import 'package:mkndn/src/shared/services/playlist_services.dart';
+import 'package:mkndn/src/shared/services/song_services.dart';
+import 'package:objectid/objectid.dart';
 
 import '../models/song.dart';
 import '../models/album.dart';
@@ -18,10 +19,10 @@ import '../mixins/randomness.dart';
 import '../mixins/media_util.dart';
 
 class DiskMediaStoreManager with Randomness, MediaUtilMixin {
-  final HiveService<Song> songsService;
-  final HiveService<Album> albumService;
-  final HiveService<Artist> artistService;
-  final HiveService<Playlist> playlistService;
+  final HiveService<ObjectId, Song> songsService;
+  final HiveService<ObjectId, Album> albumService;
+  final HiveService<ObjectId, Artist> artistService;
+  final HiveService<ObjectId, Playlist> playlistService;
   static final DiskMediaStoreManager _instance = DiskMediaStoreManager._(
       songsService: SongService.instance(),
       albumService: AlbumService.instance(),
@@ -48,14 +49,12 @@ class DiskMediaStoreManager with Randomness, MediaUtilMixin {
       String albumName = metadata.albumName ?? '';
       Album? matchedAlbum = mediaContent.albums
           .firstWhereOrNull((element) => element.title == albumName);
-      String albumId =
-          matchedAlbum != null ? matchedAlbum.id : randomStringId(6);
+      ObjectId albumId = matchedAlbum != null ? matchedAlbum.id : ObjectId();
 
       String artistName = combineValues(metadata.trackArtistNames);
       Artist? matchedArtist = mediaContent.artists
           .firstWhereOrNull((element) => element.name == artistName);
-      String artistId =
-          matchedArtist != null ? matchedArtist.id : randomStringId(6);
+      ObjectId artistId = matchedArtist != null ? matchedArtist.id : ObjectId();
 
       Uint8List albumArt =
           metadata.albumArt != null ? metadata.albumArt! : defaultAlbumArtImage;
@@ -82,7 +81,7 @@ class DiskMediaStoreManager with Randomness, MediaUtilMixin {
               image: albumArt,
               albumArtist: metadata.albumArtistName,
               year: metadata.year?.toString(),
-              songsInAlbum: List<String>.of([song.id]),
+              songsInAlbum: List<ObjectId>.of([song.id]),
             ),
           );
         }
@@ -101,7 +100,7 @@ class DiskMediaStoreManager with Randomness, MediaUtilMixin {
               0,
               id: artistId,
               name: artistName,
-              albums: List<String>.of([albumId]),
+              albums: List<ObjectId>.of([albumId]),
             ),
           );
         }
@@ -114,13 +113,13 @@ class DiskMediaStoreManager with Randomness, MediaUtilMixin {
     });
   }
 
-  Future<Song> _makeSong(Metadata metadata, String album, String artist,
+  Future<Song> _makeSong(Metadata metadata, ObjectId album, ObjectId artist,
       Uint8List albumArt) async {
     return Song(
       DateTime.now(),
       null,
       0,
-      id: randomStringId(6),
+      id: ObjectId(),
       title: metadata.trackName ?? '',
       path: metadata.filePath!,
       album: album,
@@ -165,13 +164,13 @@ class DiskMediaStoreManager with Randomness, MediaUtilMixin {
 
   Future<void> generateDefaultPlaylist(
       MediaContent mediaContent, Uint8List albumArt) async {
-    List<String> songs = mediaContent.songs.map((e) => e.id).toList();
+    List<ObjectId> songs = mediaContent.songs.map((e) => e.id).toList();
     mediaContent.addPlaylist(
       Playlist(
         DateTime.now(),
         null,
         0,
-        id: randomStringId(6),
+        id: ObjectId(),
         title: 'JM Playlist',
         cover: albumArt,
         songs: songs,

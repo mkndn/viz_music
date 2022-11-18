@@ -1,14 +1,14 @@
-import 'package:myartist/src/shared/enums/repeat_mode.dart';
-import 'package:myartist/src/shared/enums/state.dart';
-import 'package:myartist/src/shared/models/song.dart';
-import 'package:myartist/src/shared/playback/bloc/bloc.dart';
-import 'package:myartist/src/shared/services/hive_services.dart';
-import 'package:myartist/src/shared/services/player_state_service.dart';
-import 'package:myartist/src/shared/state/player_state.dart';
-import 'package:myartist/src/shared/typedefs.dart';
+import 'package:mkndn/src/shared/classes/song_queue.dart';
+import 'package:mkndn/src/shared/enums/repeat_mode.dart';
+import 'package:mkndn/src/shared/enums/state.dart';
+import 'package:mkndn/src/shared/playback/bloc/bloc.dart';
+import 'package:mkndn/src/shared/services/hive_services.dart';
+import 'package:mkndn/src/shared/services/player_state_service.dart';
+import 'package:mkndn/src/shared/state/player_state.dart';
+import 'package:mkndn/src/shared/typedefs.dart';
 
 class DiskStateStorageManager {
-  final HiveService<dynamic> playerStateService;
+  final HiveService<String, dynamic> playerStateService;
 
   static final DiskStateStorageManager _instance = DiskStateStorageManager._(
     playerStateService: PlayerStateService.instance(),
@@ -25,9 +25,8 @@ class DiskStateStorageManager {
   }
 
   PlayerStateModel loadData() {
-    final queue = playerStateService.getItem(PlayerStateKey.queue.name);
-    final currentIndex =
-        playerStateService.getItem(PlayerStateKey.currentIndex.name);
+    final queue =
+        playerStateService.getItem(PlayerStateKey.queue.name) as SongQueue?;
     final progress = playerStateService.getItem(PlayerStateKey.progress.name);
     final repeatMode =
         playerStateService.getItem(PlayerStateKey.repeatMode.name);
@@ -39,12 +38,9 @@ class DiskStateStorageManager {
     final isFullPlayerOn =
         playerStateService.getItem(PlayerStateKey.isFullPlayerOn.name);
     return PlayerStateModel(
-      queue: queue != null
-          ? List.castFrom(queue)
-          : List<Song>.empty(growable: true),
+      queue: queue ?? SongQueue.instance(),
       repeatModeParam:
           repeatMode ?? RepeatMode.of(repeatMode, RepeatMode.noRepeat),
-      currentIndex: castOrFallback<int>(currentIndex, 0),
       progressParam: progress,
       volumeParam: castOrFallback<double>(volume, 0.5),
       previousVolume: castOrNull<double>(previousVolume),
@@ -55,7 +51,6 @@ class DiskStateStorageManager {
   }
 
   void persistState(PlaybackState state) {
-    persistItem(PlayerStateKey.currentIndex, state.currentIndex);
     persistItem(PlayerStateKey.queue, state.queue);
     persistItem(PlayerStateKey.progress, state.songWithProgress?.progress);
     persistItem(PlayerStateKey.repeatMode, state.repeatMode);

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:myartist/src/shared/classes/media_content.dart';
-import 'package:myartist/src/shared/models/song.dart';
-import 'package:myartist/src/shared/enums/display_type.dart';
-import 'package:myartist/src/shared/extensions.dart';
-import 'package:myartist/src/shared/playback/bloc/playback_bloc.dart';
-import 'package:myartist/src/shared/typedefs.dart';
-import 'package:myartist/src/shared/views/image_tile.dart';
+import 'package:mkndn/src/shared/classes/media_content.dart';
+import 'package:mkndn/src/shared/classes/song_queue.dart';
+import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/enums/display_type.dart';
+import 'package:mkndn/src/shared/extensions.dart';
+import 'package:mkndn/src/shared/playback/bloc/playback_bloc.dart';
+import 'package:mkndn/src/shared/views/image_tile.dart';
+import 'package:objectid/objectid.dart';
 
 class SongContentMixin extends StatefulWidget {
   const SongContentMixin({
     required this.mediaContent,
-    required this.songs,
+    required this.queue,
     required this.display,
     required this.constraints,
     this.axis = Axis.vertical,
@@ -20,7 +21,7 @@ class SongContentMixin extends StatefulWidget {
 
   final MediaContent mediaContent;
   final Axis axis;
-  final List<Song> songs;
+  final SongQueue queue;
   final BoxConstraints constraints;
   final DisplayType display;
 
@@ -29,23 +30,21 @@ class SongContentMixin extends StatefulWidget {
 }
 
 class _SongContentMixinState extends State<SongContentMixin> {
-  bool _queueInitiated = false;
-
-  PlaybackEvent getEvent(int index) {
-    return _queueInitiated
-        ? PlaybackEvent.changeSong(index)
-        : PlaybackEvent.initQueue(widget.songs, index);
+  PlaybackEvent getEvent(ObjectId songId, bool queueInitiated) {
+    return queueInitiated
+        ? PlaybackEvent.changeSong(widget.queue.getSongById(songId))
+        : PlaybackEvent.initQueue(widget.queue);
   }
 
   @override
   Widget build(BuildContext context) {
     if (widget.display == DisplayType.LIST) {
-      return buildListLayout(() => BlocProvider.of<PlaybackBloc>(context));
+      return buildListLayout(BlocProvider.of<PlaybackBloc>(context));
     }
-    return buildGridLayout(() => BlocProvider.of<PlaybackBloc>(context));
+    return buildGridLayout(BlocProvider.of<PlaybackBloc>(context));
   }
 
-  Widget buildGridLayout(Supplier<Bloc> blocSupplier) {
+  Widget buildGridLayout(PlaybackBloc bloc) {
     return GridView.builder(
       clipBehavior: Clip.antiAliasWithSaveLayer,
       scrollDirection: Axis.vertical,
@@ -56,11 +55,12 @@ class _SongContentMixinState extends State<SongContentMixin> {
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
       ),
-      itemCount: widget.songs.length,
+      itemCount: widget.queue.songs.length,
       itemBuilder: (context, index) {
-        Song song = widget.songs[index];
+        Song song = widget.queue.songs[index];
         return GestureDetector(
-          onTap: () => blocSupplier().add(getEvent(index)),
+          onTap: () => bloc.add(getEvent(
+              widget.queue.songs[index].id, bloc.state.queue.isNotEmpty)),
           child: ImageTile(
             image: song.image,
             contents: [
@@ -74,16 +74,17 @@ class _SongContentMixinState extends State<SongContentMixin> {
     );
   }
 
-  Widget buildListLayout(Supplier<Bloc> blocSupplier) {
+  Widget buildListLayout(PlaybackBloc bloc) {
     return ListView.builder(
       scrollDirection: widget.axis,
       shrinkWrap: true,
       padding: const EdgeInsets.all(15),
-      itemCount: widget.songs.length,
+      itemCount: widget.queue.songs.length,
       itemBuilder: (context, index) {
-        Song song = widget.songs[index];
+        Song song = widget.queue.songs[index];
         return GestureDetector(
-          onTap: () => blocSupplier().add(getEvent(index)),
+          onTap: () => bloc.add(getEvent(
+              widget.queue.songs[index].id, bloc.state.queue.isNotEmpty)),
           child: ImageTile(
             image: song.image,
             contents: [

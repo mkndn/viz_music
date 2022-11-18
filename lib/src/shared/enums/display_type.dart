@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:myartist/src/shared/mixins/utils.dart';
+import 'package:mkndn/src/shared/mixins/utils.dart';
 
 enum DisplayType {
   LIST('List', Icon(Icons.list)),
