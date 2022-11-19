@@ -7,7 +7,6 @@ import 'package:mkndn/src/shared/enums/display_type.dart';
 import 'package:mkndn/src/shared/extensions.dart';
 import 'package:mkndn/src/shared/playback/bloc/playback_bloc.dart';
 import 'package:mkndn/src/shared/views/image_tile.dart';
-import 'package:objectid/objectid.dart';
 
 class SongContentMixin extends StatefulWidget {
   const SongContentMixin({
@@ -30,12 +29,6 @@ class SongContentMixin extends StatefulWidget {
 }
 
 class _SongContentMixinState extends State<SongContentMixin> {
-  PlaybackEvent getEvent(ObjectId songId, bool queueInitiated) {
-    return queueInitiated
-        ? PlaybackEvent.changeSong(widget.queue.getSongById(songId))
-        : PlaybackEvent.initQueue(widget.queue);
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.display == DisplayType.LIST) {
@@ -59,8 +52,7 @@ class _SongContentMixinState extends State<SongContentMixin> {
       itemBuilder: (context, index) {
         Song song = widget.queue.songs[index];
         return GestureDetector(
-          onTap: () => bloc.add(getEvent(
-              widget.queue.songs[index].id, bloc.state.queue.isNotEmpty)),
+          onTap: () => bloc.add(PlaybackEvent.nextQueue()),
           child: ImageTile(
             image: song.image,
             contents: [
@@ -83,8 +75,7 @@ class _SongContentMixinState extends State<SongContentMixin> {
       itemBuilder: (context, index) {
         Song song = widget.queue.songs[index];
         return GestureDetector(
-          onTap: () => bloc.add(getEvent(
-              widget.queue.songs[index].id, bloc.state.queue.isNotEmpty)),
+          onTap: () => bloc.add(PlaybackEvent.nextQueue()),
           child: ImageTile(
             image: song.image,
             contents: [

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mkndn/src/shared/classes/song_queue.dart';
 import 'package:mkndn/src/shared/extensions.dart';
 import 'package:mkndn/src/shared/models/song.dart';
-import 'package:objectid/objectid.dart';
 import '../../../shared/playback/bloc/bloc.dart';
 import '../../../shared/views/image_clipper.dart';
 import '../../../shared/views/views.dart';
@@ -12,12 +11,6 @@ class SongListMixin extends StatelessWidget {
   const SongListMixin({super.key, required this.queue});
 
   final SongQueue queue;
-
-  PlaybackEvent getEvent(ObjectId songId, bool queueInitiated) {
-    return queueInitiated
-        ? PlaybackEvent.changeSong(queue.getSongById(songId))
-        : PlaybackEvent.initQueue(queue);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +46,7 @@ class SongListMixin extends StatelessWidget {
                 hoverMode: HoverMode.overlay,
                 song: queue.songs[index],
                 index: index,
-                action: () => bloc.add(getEvent(
-                    queue.songs[index].id, bloc.state.queue.isNotEmpty)),
+                action: () => bloc.add(PlaybackEvent.nextQueue()),
                 child: Center(
                   child: Text(
                     (index + 1).toString(),
@@ -85,7 +77,7 @@ class SongListMixin extends StatelessWidget {
       ),
       itemBuilder: (song, index) {
         return ListTile(
-          onTap: () => bloc.add(getEvent(song.id, bloc.state.queue.isNotEmpty)),
+          onTap: () => bloc.add(PlaybackEvent.nextQueue()),
           leading: ClippedImage(song.image),
           title: Text(song.title),
           subtitle: Text(song.length.toHumanizedString()),

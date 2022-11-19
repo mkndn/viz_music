@@ -81,9 +81,8 @@ class AlbumScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 20),
                     child: SongListMixin(
-                      queue: SongQueue.init(
-                          info.getSongsById(album.songsInAlbum),
-                          album.songsInAlbum[0]),
+                      queue:
+                          SongQueue.load(info.getSongsById(album.songsInAlbum)),
                     ),
                   ),
                 ),

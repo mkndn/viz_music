@@ -11,20 +11,17 @@ class PlaybackState with _$PlaybackState {
     @Default(false) bool isMuted,
     @Default(false) bool isPlaying,
     @Default(false) bool isFullPlayerOn,
-    SongWithProgress? songWithProgress,
     @Default(RepeatMode.noRepeat) RepeatMode repeatMode,
     required SongQueue queue,
   }) = _PlaybackState;
 
-  factory PlaybackState.initial() => PlaybackState(queue: SongQueue.instance());
+  factory PlaybackState.initial() => PlaybackState(queue: SongQueue.initial());
+
+  factory PlaybackState.fromJson(Map<String, dynamic> json) =>
+      _$PlaybackStateFromJson(json);
+
   factory PlaybackState.load(PlayerStateModel initialData) {
     return PlaybackState.initial().copyWith(
-      songWithProgress: initialData.queue.isNotEmpty
-          ? SongWithProgress(
-              progress: initialData.progress,
-              song: initialData.queue.currentSong,
-            )
-          : null,
       queue: initialData.queue,
       volume: initialData.volume,
       previousVolume: initialData.previousVolume,
@@ -43,4 +40,10 @@ class SongWithProgress with _$SongWithProgress {
     required Duration progress,
     required Song song,
   }) = _SongWithProgress;
+
+  factory SongWithProgress.initial(Song song) =>
+      SongWithProgress(song: song, progress: Duration());
+
+  factory SongWithProgress.fromJson(Map<String, dynamic> json) =>
+      _$SongWithProgressFromJson(json);
 }

@@ -66,3 +66,47 @@ class SongAdapter extends TypeAdapter<Song> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+Song _$SongFromJson(Map<String, dynamic> json) => Song(
+      const DateTimeConverter().fromJson(json['dateAdded'] as String),
+      _$JsonConverterFromJson<String, DateTime>(
+          json['dateLastListened'], const DateTimeConverter().fromJson),
+      json['listenCount'] as int,
+      id: const ObjectIdConverter().fromJson(json['id'] as String),
+      title: json['title'] as String,
+      path: json['path'] as String,
+      album: const ObjectIdConverter().fromJson(json['album'] as String),
+      artist: const ObjectIdConverter().fromJson(json['artist'] as String),
+      length: const DurationConverter().fromJson(json['length'] as int),
+      image: const Uint8ListConverter().fromJson(json['image'] as List<int>),
+    );
+
+Map<String, dynamic> _$SongToJson(Song instance) => <String, dynamic>{
+      'listenCount': instance.listenCount,
+      'dateAdded': const DateTimeConverter().toJson(instance.dateAdded),
+      'dateLastListened': _$JsonConverterToJson<String, DateTime>(
+          instance.dateLastListened, const DateTimeConverter().toJson),
+      'id': const ObjectIdConverter().toJson(instance.id),
+      'artist': const ObjectIdConverter().toJson(instance.artist),
+      'album': const ObjectIdConverter().toJson(instance.album),
+      'title': instance.title,
+      'path': instance.path,
+      'length': const DurationConverter().toJson(instance.length),
+      'image': const Uint8ListConverter().toJson(instance.image),
+    };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);

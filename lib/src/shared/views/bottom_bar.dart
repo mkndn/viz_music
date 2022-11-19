@@ -36,7 +36,6 @@ class BottomBar extends StatelessWidget implements PreferredSizeWidget {
       builder: (context, state) {
         return _BottomBar(
           mediaManagerState: mediaManagerState,
-          songWithProgress: state.songWithProgress,
           isMuted: state.isMuted,
           isPlaying: state.isPlaying,
           isFullPlayerOn: state.isFullPlayerOn,
@@ -46,9 +45,7 @@ class BottomBar extends StatelessWidget implements PreferredSizeWidget {
           togglePlayPause: () => bloc.add(
             const PlaybackEvent.togglePlayPause(),
           ),
-          changeSong: (Song song) {
-            bloc.add(PlaybackEvent.changeSong(song));
-          },
+          nextQueue: () => bloc.add(PlaybackEvent.nextQueue()),
           toggleFullPlayer: () => bloc.add(
             const PlaybackEvent.toggleFullPlayer(),
           ),
@@ -65,7 +62,6 @@ class BottomBar extends StatelessWidget implements PreferredSizeWidget {
 class _BottomBar extends StatefulWidget {
   const _BottomBar({
     required this.mediaManagerState,
-    required this.songWithProgress,
     required this.isMuted,
     required this.isPlaying,
     required this.isFullPlayerOn,
@@ -75,12 +71,11 @@ class _BottomBar extends StatefulWidget {
     required this.togglePlayPause,
     required this.toggleFullPlayer,
     required this.changeRepeatMode,
-    required this.changeSong,
+    required this.nextQueue,
     required this.volume,
   });
 
   final InMemoryMediaManagerState mediaManagerState;
-  final SongWithProgress? songWithProgress;
   final bool isMuted;
   final bool isPlaying;
   final bool isFullPlayerOn;
@@ -90,7 +85,7 @@ class _BottomBar extends StatefulWidget {
   final VoidCallback togglePlayPause;
   final VoidCallback toggleFullPlayer;
   final VoidCallback changeRepeatMode;
-  final Consumer<Song> changeSong;
+  final VoidCallback nextQueue;
   final double volume;
 
   @override
@@ -111,10 +106,11 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
   Future<void> handleRankMedia(
     Duration currentProgress,
   ) async {
-    if (widget.songWithProgress != null) {
-      if (widget.songWithProgress!.progress.inMilliseconds >
-          widget.songWithProgress!.song.length.inMilliseconds * 0.05) {
-        widget.mediaManagerState.rankMedia(widget.songWithProgress!.song.id);
+    if (widget.queue.songWithProgress != null) {
+      if (widget.queue.songWithProgress!.progress.inMilliseconds >
+          widget.queue.songWithProgress!.song.length.inMilliseconds * 0.05) {
+        widget.mediaManagerState
+            .rankMedia(widget.queue.songWithProgress!.song.id);
         await _rankMediaStreamSubscription!.cancel();
       }
     }
@@ -184,9 +180,9 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     _info = widget.mediaManagerState.content;
-    _artist = widget.songWithProgress?.song.artist;
-    _progress = widget.songWithProgress?.progress;
-    _song = widget.songWithProgress?.song;
+    _artist = widget.queue.songWithProgress?.song.artist;
+    _progress = widget.queue.songWithProgress?.progress;
+    _song = widget.queue.songWithProgress?.song;
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       this._overlayState = Overlay.of(context);
@@ -264,7 +260,7 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
                     isPlaying: widget.isPlaying,
                     togglePlayPause: widget.togglePlayPause,
                     changeRepeatMode: widget.changeRepeatMode,
-                    changeSong: widget.changeSong,
+                    nextQueue: widget.nextQueue,
                     queue: widget.queue,
                     repeatMode: widget.repeatMode,
                     songlistValue: _isSonglistLoaded,
@@ -521,7 +517,7 @@ class _PlaybackControls extends StatelessWidget {
     required this.isPlaying,
     required this.togglePlayPause,
     required this.changeRepeatMode,
-    required this.changeSong,
+    required this.nextQueue,
     required this.queue,
     required this.repeatMode,
     required this.renderSonglist,
@@ -531,7 +527,7 @@ class _PlaybackControls extends StatelessWidget {
   final bool isPlaying;
   final VoidCallback togglePlayPause;
   final VoidCallback changeRepeatMode;
-  final Consumer<Song> changeSong;
+  final VoidCallback nextQueue;
   final SongQueue queue;
   final RepeatMode repeatMode;
   final VoidCallback renderSonglist;
@@ -572,7 +568,7 @@ class _PlaybackControls extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.skip_next, size: iconSize),
-            onPressed: () => changeSong(queue.getNextSong()),
+            onPressed: () => nextQueue(),
           ),
           Padding(
             padding: EdgeInsets.fromLTRB(innerPadding, 0, 0, 0),
@@ -725,7 +721,7 @@ class _FullScreenPlayerState extends State<_FullScreenPlayer> {
   Widget buildPlayer(
       BuildContext context, PlaybackState state, BoxConstraints dimens) {
     final bloc = BlocProvider.of<PlaybackBloc>(context);
-    final current = state.songWithProgress;
+    final current = state.queue.songWithProgress;
     final song = current?.song;
     final queue = state.queue;
     final repeatMode = state.repeatMode;
@@ -819,8 +815,7 @@ class _FullScreenPlayerState extends State<_FullScreenPlayer> {
                   isPlaying: state.isPlaying,
                   togglePlayPause: () =>
                       bloc.add(const PlaybackEvent.togglePlayPause()),
-                  changeSong: (index) =>
-                      bloc.add(PlaybackEvent.changeSong(index)),
+                  nextQueue: () => bloc.add(PlaybackEvent.nextQueue()),
                   changeRepeatMode: () =>
                       bloc.add(const PlaybackEvent.changeRepeatMode()),
                   queue: queue,
@@ -871,7 +866,7 @@ class _MobilePlayer extends StatelessWidget {
   Widget buildPlayer(
       BuildContext context, PlaybackState state, BoxConstraints dimens) {
     final bloc = BlocProvider.of<PlaybackBloc>(context);
-    final current = state.songWithProgress;
+    final current = state.queue.songWithProgress;
     final queue = state.queue;
     final repeatMode = state.repeatMode;
     final Artist? artist = current?.song.artist != null
@@ -959,8 +954,7 @@ class _MobilePlayer extends StatelessWidget {
                       isPlaying: state.isPlaying,
                       togglePlayPause: () =>
                           bloc.add(const PlaybackEvent.togglePlayPause()),
-                      changeSong: (Song song) =>
-                          bloc.add(PlaybackEvent.changeSong(song)),
+                      nextQueue: () => bloc.add(PlaybackEvent.nextQueue()),
                       changeRepeatMode: () =>
                           bloc.add(const PlaybackEvent.changeRepeatMode()),
                       queue: queue,

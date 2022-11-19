@@ -19,10 +19,10 @@ import '../mixins/randomness.dart';
 import '../mixins/media_util.dart';
 
 class DiskMediaStoreManager with Randomness, MediaUtilMixin {
-  final HiveService<ObjectId, Song> songsService;
-  final HiveService<ObjectId, Album> albumService;
-  final HiveService<ObjectId, Artist> artistService;
-  final HiveService<ObjectId, Playlist> playlistService;
+  final HiveService<Song> songsService;
+  final HiveService<Album> albumService;
+  final HiveService<Artist> artistService;
+  final HiveService<Playlist> playlistService;
   static final DiskMediaStoreManager _instance = DiskMediaStoreManager._(
       songsService: SongService.instance(),
       albumService: AlbumService.instance(),
@@ -145,16 +145,16 @@ class DiskMediaStoreManager with Randomness, MediaUtilMixin {
   }
 
   void updateSong(Song element) =>
-      songsService.addItemToBox(item: element, key: element.id);
+      songsService.addItemToBox(item: element, key: element.id.hexString);
 
   void updateAlbum(Album element) =>
-      albumService.addItemToBox(item: element, key: element.id);
+      albumService.addItemToBox(item: element, key: element.id.hexString);
 
   void updateArtist(Artist element) =>
-      artistService.addItemToBox(item: element, key: element.id);
+      artistService.addItemToBox(item: element, key: element.id.hexString);
 
   void updatePaylist(Playlist element) =>
-      playlistService.addItemToBox(item: element, key: element.id);
+      playlistService.addItemToBox(item: element, key: element.id.hexString);
 
   Future<Uint8List> cacheDefaultAlbumArt() async {
     final File defaultAlbumArt =

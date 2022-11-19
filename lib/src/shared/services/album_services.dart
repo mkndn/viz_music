@@ -2,9 +2,8 @@ import 'package:hive/hive.dart';
 import 'package:mkndn/src/shared/models/album.dart';
 import 'package:mkndn/src/shared/enums/hive_box.dart';
 import 'package:mkndn/src/shared/services/hive_services.dart';
-import 'package:objectid/objectid.dart';
 
-class AlbumService extends HiveService<ObjectId, Album> {
+class AlbumService extends HiveService<Album> {
   final Box<Album> _box;
 
   AlbumService._(this._box);

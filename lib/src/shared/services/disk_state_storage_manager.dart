@@ -8,7 +8,7 @@ import 'package:mkndn/src/shared/state/player_state.dart';
 import 'package:mkndn/src/shared/typedefs.dart';
 
 class DiskStateStorageManager {
-  final HiveService<String, dynamic> playerStateService;
+  final HiveService<dynamic> playerStateService;
 
   static final DiskStateStorageManager _instance = DiskStateStorageManager._(
     playerStateService: PlayerStateService.instance(),
@@ -27,7 +27,6 @@ class DiskStateStorageManager {
   PlayerStateModel loadData() {
     final queue =
         playerStateService.getItem(PlayerStateKey.queue.name) as SongQueue?;
-    final progress = playerStateService.getItem(PlayerStateKey.progress.name);
     final repeatMode =
         playerStateService.getItem(PlayerStateKey.repeatMode.name);
     final volume = playerStateService.getItem(PlayerStateKey.volume.name);
@@ -38,10 +37,9 @@ class DiskStateStorageManager {
     final isFullPlayerOn =
         playerStateService.getItem(PlayerStateKey.isFullPlayerOn.name);
     return PlayerStateModel(
-      queue: queue ?? SongQueue.instance(),
+      queue: queue ?? SongQueue.initial(),
       repeatModeParam:
           repeatMode ?? RepeatMode.of(repeatMode, RepeatMode.noRepeat),
-      progressParam: progress,
       volumeParam: castOrFallback<double>(volume, 0.5),
       previousVolume: castOrNull<double>(previousVolume),
       isMutedParam: castOrNull<bool>(isMuted),
@@ -52,7 +50,6 @@ class DiskStateStorageManager {
 
   void persistState(PlaybackState state) {
     persistItem(PlayerStateKey.queue, state.queue);
-    persistItem(PlayerStateKey.progress, state.songWithProgress?.progress);
     persistItem(PlayerStateKey.repeatMode, state.repeatMode);
     persistItem(PlayerStateKey.volume, state.volume);
     persistItem(PlayerStateKey.previousVolume, state.previousVolume);

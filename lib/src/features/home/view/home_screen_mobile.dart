@@ -68,21 +68,17 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
               ),
               SongContentMixin(
                 mediaContent: widget.mediaContent,
-                queue: SongQueue.init(
-                    widget.mediaContent.getSongsById(
-                      topSongs.songs,
-                    ),
-                    topSongs.songs[0]),
+                queue: SongQueue.load(widget.mediaContent.getSongsById(
+                  topSongs.songs,
+                )),
                 constraints: constraints,
                 display: DisplayType.GRID,
               ),
               SongContentMixin(
                 mediaContent: widget.mediaContent,
-                queue: SongQueue.init(
-                    widget.mediaContent.getSongsById(
-                      newReleases.songs,
-                    ),
-                    newReleases.songs[0]),
+                queue: SongQueue.load(widget.mediaContent.getSongsById(
+                  newReleases.songs,
+                )),
                 display: DisplayType.GRID,
                 constraints: constraints,
               ),

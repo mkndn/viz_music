@@ -11,6 +11,7 @@ import 'package:mkndn/src/shared/state/player_state.dart';
 part 'playback_event.dart';
 part 'playback_state.dart';
 part 'playback_bloc.freezed.dart';
+part 'playback_bloc.g.dart';
 
 class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
   final AudioPlayer _player = AudioPlayer();
@@ -18,13 +19,12 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
       DiskStateStorageManager.instance();
 
   PlaybackBloc() : super(PlaybackState.load(_stateStorageManager.loadData())) {
-    if (state.songWithProgress?.progress != null) {
-      _player.seek(state.songWithProgress!.progress);
+    if (state.queue.songWithProgress?.progress != null) {
+      _player.seek(state.queue.songWithProgress!.progress);
     }
     on<PlaybackEvent>(
       (event, emit) => event.map(
-        initQueue: (event) => _initQueue(event, emit),
-        changeSong: (event) => _changeSong(event, emit),
+        nextQueue: (event) => _nextQueue(event, emit),
         moveToInSong: (event) => _moveToInSong(event, emit),
         setVolume: (event) => _setVolume(event, emit),
         songProgress: (event) => _songProgress(event, emit),
@@ -40,34 +40,15 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
   StreamSubscription<Duration>? _currentlyPlayingSubscription;
 
   Stream<Duration> _startPlayingStream() async* {
-    while (state.songWithProgress!.progress <
-        state.songWithProgress!.song.length) {
+    while (state.queue.songWithProgress!.progress <
+        state.queue.songWithProgress!.song.length) {
       await Future<void>.delayed(_playbackUpdateInterval);
       yield _playbackUpdateInterval;
-      if (state.songWithProgress!.progress >=
-          state.songWithProgress!.song.length) {
-        add(_getEventByRepeatMode(true));
+      if (state.queue.songWithProgress!.progress >=
+          state.queue.songWithProgress!.song.length) {
+        add(PlaybackEvent.nextQueue());
         break;
       }
-    }
-  }
-
-  PlaybackEvent _getEventByRepeatMode(bool isAutoMode) {
-    if (state.repeatMode.idx == 0) {
-      if (state.queue.isLastSong) {
-        return PlaybackEvent.togglePlayPause();
-      } else {
-        return PlaybackEvent.changeSong(state.queue.getNextSong());
-      }
-    }
-    if (state.repeatMode.idx == 1) {
-      return PlaybackEvent.changeSong(state.queue.currentSong);
-    }
-
-    if (state.queue.isLastSong) {
-      return PlaybackEvent.changeSong(state.queue.getFirstSong());
-    } else {
-      return PlaybackEvent.changeSong(state.queue.getNextSong());
     }
   }
 
@@ -90,39 +71,31 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
   void _resumePlayback() {
     _currentlyPlayingSubscription =
         _startPlayingStream().listen(_handlePlaybackProgress);
-    if (state.songWithProgress?.song != null) {
+    if (state.queue.songWithProgress?.song != null) {
       _player.play(
-        DeviceFileSource(state.songWithProgress!.song.path),
+        DeviceFileSource(state.queue.songWithProgress!.song.path),
         mode: PlayerMode.mediaPlayer,
       );
     }
   }
 
-  void _initQueue(InitQueue event, Emitter<PlaybackState> emit) {
-    emit(
-      state.copyWith(
-        isPlaying: true,
-        queue: event.queue,
-        songWithProgress: SongWithProgress(
-          progress: const Duration(),
-          song: event.queue.currentSong,
-        ),
-      ),
-    );
-    _resumePlayback();
+  void _nextQueue(NextQueue event, Emitter<PlaybackState> emit) {
+    SongQueue? nextQueue = state.queue.getNext(state.repeatMode.idx);
+    if (nextQueue == null) {
+      PlaybackEvent.togglePlayPause();
+    } else {
+      _changeSong(nextQueue, emit);
+    }
   }
 
-  void _changeSong(ChangeSong event, Emitter<PlaybackState> emit) {
+  void _changeSong(SongQueue nextQueue, Emitter<PlaybackState> emit) {
     if (_currentlyPlayingSubscription != null) {
       _currentlyPlayingSubscription!.cancel();
     }
     emit(
       state.copyWith(
         isPlaying: true,
-        songWithProgress: SongWithProgress(
-          progress: const Duration(),
-          song: event.song,
-        ),
+        queue: nextQueue,
       ),
     );
     _resumePlayback();
@@ -131,8 +104,10 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
   void _songProgress(SongProgress event, Emitter<PlaybackState> emit) {
     emit(
       state.copyWith(
-        songWithProgress: state.songWithProgress!.copyWith(
-          progress: state.songWithProgress!.progress + event.duration,
+        queue: state.queue.copyWith(
+          songWithProgress: state.queue.songWithProgress!.copyWith(
+            progress: state.queue.songWithProgress!.progress + event.duration,
+          ),
         ),
       ),
     );
@@ -185,13 +160,16 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
   void _moveToInSong(MoveToInSong event, Emitter<PlaybackState> emit) {
     _pausePlayback();
     final targetMilliseconds =
-        state.songWithProgress!.song.length.inMilliseconds * event.percent;
+        state.queue.songWithProgress!.song.length.inMilliseconds *
+            event.percent;
     final progressDuration = Duration(milliseconds: targetMilliseconds.toInt());
     emit(
       state.copyWith(
         isPlaying: false,
-        songWithProgress: state.songWithProgress!.copyWith(
-          progress: progressDuration,
+        queue: state.queue.copyWith(
+          songWithProgress: state.queue.songWithProgress!.copyWith(
+            progress: progressDuration,
+          ),
         ),
       ),
     );

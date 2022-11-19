@@ -109,9 +109,8 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
                             ),
                           ),
                           LayoutBuilder(
-                            builder: (context, constraints) => SongListMixin(
-                                queue: SongQueue.init(
-                                    topSongs, topSongs.first.id)),
+                            builder: (context, constraints) =>
+                                SongListMixin(queue: SongQueue.load(topSongs)),
                           ),
                         ],
                       ),
@@ -133,8 +132,7 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
                           ),
                           LayoutBuilder(
                             builder: (context, constraints) => SongListMixin(
-                                queue: SongQueue.init(
-                                    newReleases, newReleases.first.id)),
+                                queue: SongQueue.load(newReleases)),
                           ),
                         ],
                       ),

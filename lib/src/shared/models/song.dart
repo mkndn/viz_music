@@ -1,9 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:mkndn/src/shared/converters.dart';
 import 'package:mkndn/src/shared/models/ranked.dart';
 import 'package:objectid/objectid.dart';
 part 'song.g.dart';
 
+@JsonSerializable(converters: [
+  DateTimeConverter(),
+  Uint8ListConverter(),
+  ObjectIdConverter(),
+  DurationConverter(),
+])
 @HiveType(typeId: 1)
 class Song extends Ranked {
   @HiveField(0)
@@ -55,4 +63,8 @@ class Song extends Ranked {
       this.artist.hashCode ^
       this.length.hashCode ^
       this.image.hashCode;
+
+  factory Song.fromJson(Map<String, dynamic> json) => _$SongFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SongToJson(this);
 }
