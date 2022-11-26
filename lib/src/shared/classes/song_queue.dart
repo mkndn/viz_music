@@ -1,10 +1,9 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:mkndn/src/shared/converters.dart';
 import 'package:mkndn/src/shared/mixins/media_util.dart';
-import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/classes/song.dart';
 import 'package:mkndn/src/shared/playback/bloc/playback_bloc.dart';
-import 'package:objectid/objectid.dart';
 
 part 'song_queue.freezed.dart';
 part 'song_queue.g.dart';
@@ -15,7 +14,7 @@ class SongQueue with _$SongQueue, MediaUtilMixin {
 
   const factory SongQueue({
     required List<Song> songs,
-    @ObjectIdConverter() ObjectId? currentPlayingId,
+    String? currentPlayingTitle,
     SongWithProgress? songWithProgress,
   }) = _SongQueue;
 
@@ -26,22 +25,35 @@ class SongQueue with _$SongQueue, MediaUtilMixin {
   factory SongQueue.fromJson(Map<String, dynamic> json) =>
       _$SongQueueFromJson(json);
 
-  SongQueue get currentSong => valueOrDefault(() => this, getFirstSong());
+  @override
+  bool operator ==(other) {
+    return (other is SongQueue) &&
+        listEquals(this.songs, other.songs) &&
+        this.songWithProgress == other.songWithProgress;
+  }
 
-  Song getSongById(ObjectId songId) => valueOrDefault(
-      () => songs.firstWhereOrNull((e) => e.id == songId), this.songs[0]);
+  SongQueue addSong(Song song) {
+    this.songs.add(song);
+    return this;
+  }
 
-  bool get isEmpty => songs.isEmpty || currentPlayingId == null;
+  Song get currentSong => valueOrDefault(
+      () => this.getSongByTitle(this.currentPlayingTitle!), getFirstSong());
+
+  Song getSongByTitle(String songTitle) => valueOrDefault(
+      () => songs.firstWhereOrNull((e) => e.title == songTitle), this.songs[0]);
+
+  bool get isEmpty => songs.isEmpty || currentPlayingTitle == null;
 
   bool get isNotEmpty => !isEmpty;
 
   int get currentPlayingIndex => indexWhereOrDefault(
-      () => this.songs.indexWhere((element) => element.id == currentPlayingId),
+      () => this.songs.indexWhere((song) => song.title == currentPlayingTitle),
       0);
 
   bool get isFirstSong => currentPlayingIndex == 0;
 
-  SongQueue? getNext(int repeatMode) {
+  Song? getNext(int repeatMode) {
     if (repeatMode == 0) {
       if (this.isLastSong) {
         return null;
@@ -60,55 +72,31 @@ class SongQueue with _$SongQueue, MediaUtilMixin {
     }
   }
 
-  SongQueue getFirstSong() {
-    Song song = this.songs[0];
-    return this.copyWith(
-        currentPlayingId: song.id,
-        songWithProgress: valueOrDefault(
-          () => songWithProgress?.copyWith(song: song),
-          SongWithProgress.initial(song),
-        ));
+  Song getFirstSong() {
+    return this.songs[0];
   }
 
-  SongQueue getLastSong() {
-    Song song = this.songs[this.songs.length - 1];
-    return this.copyWith(
-        currentPlayingId: song.id,
-        songWithProgress: valueOrDefault(
-          () => songWithProgress?.copyWith(song: song),
-          SongWithProgress.initial(song),
-        ));
+  Song getLastSong() {
+    return this.songs[this.songs.length - 1];
   }
 
   bool get isLastSong =>
       indexWhereOrDefault(
           () => this
               .songs
-              .indexWhere((element) => element.id == currentPlayingId),
+              .indexWhere((element) => element.title == currentPlayingTitle),
           0) ==
       this.songs.length - 1;
 
-  SongQueue getPreviousSong() {
+  Song getPreviousSong() {
     int indexInQueue = currentPlayingIndex;
-    Song previousSong =
-        isFirstSong ? this.songs[indexInQueue] : this.songs[indexInQueue - 1];
-    return this.copyWith(
-        currentPlayingId: previousSong.id,
-        songWithProgress: valueOrDefault(
-          () => songWithProgress?.copyWith(song: previousSong),
-          SongWithProgress.initial(previousSong),
-        ));
+    return isFirstSong
+        ? this.songs[indexInQueue]
+        : this.songs[indexInQueue - 1];
   }
 
-  SongQueue getNextSong() {
+  Song getNextSong() {
     int indexInQueue = currentPlayingIndex;
-    Song nextSong =
-        isFirstSong ? this.songs[indexInQueue] : this.songs[indexInQueue + 1];
-    return this.copyWith(
-        currentPlayingId: nextSong.id,
-        songWithProgress: valueOrDefault(
-          () => songWithProgress?.copyWith(song: nextSong),
-          SongWithProgress.initial(nextSong),
-        ));
+    return isLastSong ? this.songs[indexInQueue] : this.songs[indexInQueue + 1];
   }
 }

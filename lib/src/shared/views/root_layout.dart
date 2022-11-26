@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart' as go;
-import 'package:mkndn/src/shared/services/disk_state_storage_manager.dart';
 import 'package:mkndn/src/shared/state/inmemory_media_manager.dart';
 import 'package:universal_platform/universal_platform.dart';
 
@@ -22,11 +21,9 @@ class RootLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of<PlaybackBloc>(context);
-    final stateStorageManager = DiskStateStorageManager.instance();
 
-    return BlocConsumer<PlaybackBloc, PlaybackState>(
+    return BlocBuilder<PlaybackBloc, PlaybackState>(
       bloc: bloc,
-      listener: (context, state) => stateStorageManager.persistState(state),
       builder: (context, state) => LayoutBuilder(builder: (context, dimens) {
         void onSelected(int index) {
           final destination = router.destinations[index];

@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mkndn/src/shared/classes/media_content.dart';
-import 'package:mkndn/src/shared/classes/song_queue.dart';
-import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/classes/song.dart';
 import 'package:mkndn/src/shared/enums/display_type.dart';
 import 'package:mkndn/src/shared/extensions.dart';
 import 'package:mkndn/src/shared/playback/bloc/playback_bloc.dart';
 import 'package:mkndn/src/shared/views/image_tile.dart';
 
-class SongContentMixin extends StatefulWidget {
+class SongContentMixin extends StatelessWidget {
   const SongContentMixin({
     required this.mediaContent,
-    required this.queue,
+    required this.songs,
     required this.display,
     required this.constraints,
     this.axis = Axis.vertical,
@@ -19,19 +18,14 @@ class SongContentMixin extends StatefulWidget {
   });
 
   final MediaContent mediaContent;
+  final List<Song> songs;
   final Axis axis;
-  final SongQueue queue;
   final BoxConstraints constraints;
   final DisplayType display;
 
   @override
-  State<SongContentMixin> createState() => _SongContentMixinState();
-}
-
-class _SongContentMixinState extends State<SongContentMixin> {
-  @override
   Widget build(BuildContext context) {
-    if (widget.display == DisplayType.LIST) {
+    if (display == DisplayType.LIST) {
       return buildListLayout(BlocProvider.of<PlaybackBloc>(context));
     }
     return buildGridLayout(BlocProvider.of<PlaybackBloc>(context));
@@ -43,21 +37,21 @@ class _SongContentMixinState extends State<SongContentMixin> {
       scrollDirection: Axis.vertical,
       padding: const EdgeInsets.all(15.0),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: (widget.constraints.maxWidth ~/ 200).toInt(),
+        crossAxisCount: (constraints.maxWidth ~/ 200).toInt(),
         childAspectRatio: 0.70,
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
       ),
-      itemCount: widget.queue.songs.length,
+      itemCount: songs.length,
       itemBuilder: (context, index) {
-        Song song = widget.queue.songs[index];
+        Song song = songs[index];
         return GestureDetector(
-          onTap: () => bloc.add(PlaybackEvent.nextQueue()),
+          onTap: () => bloc.add(PlaybackEvent.changeSong(song.title)),
           child: ImageTile(
-            image: song.image,
+            image: song.albumCover,
             contents: [
               song.title,
-              widget.mediaContent.getAlbumById(song.album)?.title ?? '',
+              mediaContent.getAlbumByTitle(song.album)?.title ?? '',
               song.length.toHumanizedString(),
             ],
           ),
@@ -68,19 +62,19 @@ class _SongContentMixinState extends State<SongContentMixin> {
 
   Widget buildListLayout(PlaybackBloc bloc) {
     return ListView.builder(
-      scrollDirection: widget.axis,
+      scrollDirection: axis,
       shrinkWrap: true,
       padding: const EdgeInsets.all(15),
-      itemCount: widget.queue.songs.length,
+      itemCount: songs.length,
       itemBuilder: (context, index) {
-        Song song = widget.queue.songs[index];
+        Song song = songs[index];
         return GestureDetector(
-          onTap: () => bloc.add(PlaybackEvent.nextQueue()),
+          onTap: () => bloc.add(PlaybackEvent.changeSong(song.title)),
           child: ImageTile(
-            image: song.image,
+            image: song.albumCover,
             contents: [
               song.title,
-              widget.mediaContent.getAlbumById(song.album)?.title ?? '',
+              mediaContent.getAlbumByTitle(song.album)?.title ?? '',
               song.length.toHumanizedString(),
             ],
           ),

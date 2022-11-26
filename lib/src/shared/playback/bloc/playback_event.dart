@@ -3,7 +3,10 @@ part of 'playback_bloc.dart';
 @Freezed()
 class PlaybackEvent with _$PlaybackEvent {
   const factory PlaybackEvent.togglePlayPause() = TogglePlayPause;
-  const factory PlaybackEvent.nextQueue() = NextQueue;
+  const factory PlaybackEvent.initQueue(SongQueue songQueue) = InitQueue;
+  const factory PlaybackEvent.addToQueue(Song song) = AddToQueue;
+  const factory PlaybackEvent.nextInQueue() = NextInQueue;
+  const factory PlaybackEvent.changeSong(String songId) = ChangeSong;
   const factory PlaybackEvent.setVolume(double value) = SetVolume;
   const factory PlaybackEvent.toggleMute() = ToggleMute;
   const factory PlaybackEvent.toggleFullPlayer() = ToggleFullPlayer;

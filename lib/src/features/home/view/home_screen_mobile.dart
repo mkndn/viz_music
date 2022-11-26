@@ -3,11 +3,11 @@ import 'package:mkndn/src/features/home/view/home_artists.dart';
 import 'package:mkndn/src/features/home/view/home_highlight.dart';
 import 'package:mkndn/src/features/home/view/home_recent.dart';
 import 'package:mkndn/src/features/songs/view/song_content_mixin.dart';
-import 'package:mkndn/src/shared/classes/song_queue.dart';
-import 'package:mkndn/src/shared/models/artist.dart';
+import 'package:mkndn/src/shared/classes/artist.dart';
 import 'package:mkndn/src/shared/classes/media_content.dart';
+import 'package:mkndn/src/shared/classes/song.dart';
 import 'package:mkndn/src/shared/enums/display_type.dart';
-import 'package:mkndn/src/shared/models/playlist.dart';
+import 'package:mkndn/src/shared/typedefs.dart';
 import 'package:mkndn/src/shared/views/brightness_toggle.dart';
 
 class MobileHomeScreen extends StatefulWidget {
@@ -22,10 +22,10 @@ class MobileHomeScreen extends StatefulWidget {
 class _MobileHomeScreenState extends State<MobileHomeScreen> {
   @override
   Widget build(BuildContext context) {
-    final List<Playlist> playlists = widget.mediaContent.playlists;
-    final Playlist topSongs = widget.mediaContent.playlists.first;
-    final Playlist newReleases = widget.mediaContent.playlists.last;
-    final List<Artist> artists = widget.mediaContent.artists;
+    final MapOfStringList playlists = widget.mediaContent.playlists;
+    final List<Song> topSongs = widget.mediaContent.getTop5Songs();
+    final List<Song> newReleases = widget.mediaContent.recentlyAdded();
+    final List<Artist> artists = widget.mediaContent.getTop5Artists();
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -68,17 +68,13 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
               ),
               SongContentMixin(
                 mediaContent: widget.mediaContent,
-                queue: SongQueue.load(widget.mediaContent.getSongsById(
-                  topSongs.songs,
-                )),
+                songs: topSongs,
                 constraints: constraints,
                 display: DisplayType.GRID,
               ),
               SongContentMixin(
                 mediaContent: widget.mediaContent,
-                queue: SongQueue.load(widget.mediaContent.getSongsById(
-                  newReleases.songs,
-                )),
+                songs: newReleases,
                 display: DisplayType.GRID,
                 constraints: constraints,
               ),

@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:mkndn/src/features/home/view/home_artists.dart';
 import 'package:mkndn/src/features/home/view/home_highlight.dart';
 import 'package:mkndn/src/features/home/view/home_recent.dart';
-import 'package:mkndn/src/features/songs/songs.dart';
+import 'package:mkndn/src/features/home/view/home_screen_songs.dart';
+import 'package:mkndn/src/shared/classes/artist.dart';
 import 'package:mkndn/src/shared/classes/media_content.dart';
-import 'package:mkndn/src/shared/classes/song_queue.dart';
 import 'package:mkndn/src/shared/extensions.dart';
-import 'package:mkndn/src/shared/models/artist.dart';
-import 'package:mkndn/src/shared/models/playlist.dart';
-import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/typedefs.dart';
 import 'package:mkndn/src/shared/views/brightness_toggle.dart';
+import 'package:mkndn/src/shared/views/floating_window_options.dart';
 
 class DesktopHomeScreen extends StatefulWidget {
   const DesktopHomeScreen({required this.mediaContent, super.key});
@@ -24,11 +23,10 @@ class DesktopHomeScreen extends StatefulWidget {
 class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
   @override
   Widget build(BuildContext context) {
-    final List<Playlist> playlists = widget.mediaContent.playlists;
-    final List<Song> topSongs = widget.mediaContent.getTop5Songs();
-    final List<Song> newReleases = widget.mediaContent.recentlyAdded();
+    final MapOfStringList playlists = widget.mediaContent.playlists;
     final List<Artist> artists = widget.mediaContent.getTop5Artists();
     return Scaffold(
+      floatingActionButton: FloatingWindowOptions(),
       body: SingleChildScrollView(
         child: AdaptiveColumn(
           children: [
@@ -108,10 +106,7 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
                               style: context.titleLarge,
                             ),
                           ),
-                          LayoutBuilder(
-                            builder: (context, constraints) =>
-                                SongListMixin(queue: SongQueue.load(topSongs)),
-                          ),
+                          TopSongs(content: widget.mediaContent),
                         ],
                       ),
                     ),
@@ -130,10 +125,7 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
                               style: context.titleLarge,
                             ),
                           ),
-                          LayoutBuilder(
-                            builder: (context, constraints) => SongListMixin(
-                                queue: SongQueue.load(newReleases)),
-                          ),
+                          NewReleases(content: widget.mediaContent),
                         ],
                       ),
                     ),

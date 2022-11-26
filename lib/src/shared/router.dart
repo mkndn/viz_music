@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mkndn/src/features/artists/view/artist_list.dart';
 import 'package:mkndn/src/shared/enums/hive_box.dart';
 import 'package:mkndn/src/shared/state/inmemory_media_manager.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../features/albums/albums.dart';
 import '../features/artists/artists.dart';
@@ -74,8 +75,10 @@ final appRouter = GoRouter(
         child: RootLayout(
           key: _scaffoldKey,
           currentIndex: 0,
-          child: HomeScreen(
-              mediaContent: InMemoryMediaManager.of(context).content),
+          child: DragToMoveArea(
+            child: HomeScreen(
+                mediaContent: InMemoryMediaManager.of(context).content),
+          ),
         ),
       ),
     ),
@@ -105,9 +108,8 @@ final appRouter = GoRouter(
           key: _scaffoldKey,
           currentIndex: 2,
           child: AlbumsScreen(
-            albums: InMemoryMediaManager.of(context, aspect: HiveBox.songs)
-                .content
-                .albums,
+            content:
+                InMemoryMediaManager.of(context, aspect: HiveBox.songs).content,
           ),
         ),
       ),
@@ -122,7 +124,7 @@ final appRouter = GoRouter(
               child: AlbumScreen(
                 info: InMemoryMediaManager.of(context, aspect: HiveBox.songs)
                     .content,
-                id: state.params['aid']!,
+                title: state.params['aid']!,
               ),
             ),
           ),
@@ -156,7 +158,7 @@ final appRouter = GoRouter(
               child: ArtistScreen(
                   info: InMemoryMediaManager.of(context, aspect: HiveBox.albums)
                       .content,
-                  id: state.params['aid']!),
+                  name: state.params['aid']!),
             ),
           ),
           // builder: (context, state) => ArtistScreen(
@@ -194,7 +196,7 @@ final appRouter = GoRouter(
                 mediaContent:
                     InMemoryMediaManager.of(context, aspect: HiveBox.songs)
                         .content,
-                id: state.params['pid']!,
+                title: state.params['pid']!,
               ),
             ),
           ),

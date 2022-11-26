@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mkndn/src/features/home/view/home_screen_desktop.dart';
@@ -30,12 +32,15 @@ class _HomeScreenState extends State<HomeScreen> {
     if (isFolderIntact) {
       bloc().add(const SplashScreenEvent.showSplashScreen());
       if (!widget.mediaContent.hasContent) {
-        await mediaState.init().whenComplete(
-              (() => {
-                    appState.updateState(updatedState: true),
-                    bloc().add(const SplashScreenEvent.naviagteToHomeScreen()),
-                  }),
-            );
+        await mediaState.init().whenComplete(() => {
+              Timer(
+                Duration(seconds: 2),
+                () => {
+                  appState.updateState(updatedState: true),
+                  bloc().add(const SplashScreenEvent.naviagteToHomeScreen()),
+                },
+              ),
+            });
       } else {
         appState.updateState(updatedState: true);
         bloc().add(const SplashScreenEvent.naviagteToHomeScreen());

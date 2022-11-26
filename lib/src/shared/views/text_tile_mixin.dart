@@ -51,8 +51,7 @@ class TextTileMixin extends StatelessWidget {
                   ),
                 ),
                 onTap: () => content.ref != null && redirectPrefix != null
-                    ? GoRouter.of(context)
-                        .go('$redirectPrefix/${content.ref!.hexString}')
+                    ? GoRouter.of(context).go('$redirectPrefix/${content.ref!}')
                     : {},
               ),
             ],

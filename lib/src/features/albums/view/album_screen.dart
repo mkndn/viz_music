@@ -1,24 +1,30 @@
 import 'package:adaptive_components/adaptive_components.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mkndn/src/features/songs/view/song_list_mixin.dart';
+import 'package:mkndn/src/shared/classes/album.dart';
 import 'package:mkndn/src/shared/classes/media_content.dart';
-import 'package:mkndn/src/shared/classes/song_queue.dart';
 import 'package:mkndn/src/shared/extensions.dart';
+import 'package:mkndn/src/shared/classes/song.dart';
+import 'package:mkndn/src/shared/playback/bloc/playback_bloc.dart';
 import 'package:mkndn/src/shared/views/brightness_toggle.dart';
 import 'package:mkndn/src/shared/views/image_tile.dart';
-import 'package:objectid/objectid.dart';
-
-import '../../../shared/models/album.dart';
 
 class AlbumScreen extends StatelessWidget {
-  const AlbumScreen({required this.info, required this.id, super.key});
+  const AlbumScreen({required this.info, required this.title, super.key});
 
   final MediaContent info;
-  final String id;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
-    Album? album = info.getAlbumById(ObjectId.fromHexString(id));
+    Album? album = info.getAlbumByTitle(title);
+    final PlaybackBloc bloc = BlocProvider.of<PlaybackBloc>(context);
+
+    void mutateQueue(Song song) {
+      bloc.add(PlaybackEvent.addToQueue(song));
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         if (album == null) {
@@ -66,8 +72,11 @@ class AlbumScreen extends StatelessWidget {
                     children: [
                       Expanded(
                         child: ImageTile(
-                          image: album.image,
-                          contents: [album.albumArtist ?? '', album.year ?? ''],
+                          image: album.albumCover,
+                          contents: [
+                            album.composedBy ?? '',
+                            album.year as String
+                          ],
                         ),
                       ),
                     ],
@@ -81,8 +90,9 @@ class AlbumScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 20),
                     child: SongListMixin(
-                      queue:
-                          SongQueue.load(info.getSongsById(album.songsInAlbum)),
+                      queueMutation: mutateQueue,
+                      songStreamSupplier: () =>
+                          Stream.fromIterable(album.songs),
                     ),
                   ),
                 ),

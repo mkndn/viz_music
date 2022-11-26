@@ -12,7 +12,7 @@ class ArtistList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<TextTileContent> contents = mediaContent.artists
-        .map((e) => TextTileContent(value: e.name, ref: e.id))
+        .map((e) => TextTileContent(value: e.name, ref: e.name))
         .toList();
     return LayoutBuilder(
       builder: (context, constraints) {

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mkndn/src/shared/classes/media_content.dart';
-import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/classes/song_queue.dart';
+import 'package:mkndn/src/shared/classes/song.dart';
 import 'package:mkndn/src/shared/enums/display_type.dart';
 import 'package:mkndn/src/shared/enums/sort_mode.dart';
 import 'package:mkndn/src/shared/enums/sorting.dart';
@@ -62,13 +63,16 @@ class _SongListScreenState extends State<SongListScreen> {
 
   @override
   void initState() {
-    SplashScreenBloc bloc = BlocProvider.of<SplashScreenBloc>(context);
-    bloc.add(const SplashScreenEvent.showSplashScreen());
+    final SplashScreenBloc splashBloc =
+        BlocProvider.of<SplashScreenBloc>(context);
+    splashBloc.add(const SplashScreenEvent.showSplashScreen());
+    final PlaybackBloc playbackBloc = BlocProvider.of<PlaybackBloc>(context);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       initFromPrefs().whenComplete(() {
-        this.songs = widget.mediaContent.getSongsSortedBy(_sortByField);
+        this.songs = widget.mediaContent.getSongsSortedBy(_sortByField, false);
+        playbackBloc.add(PlaybackEvent.initQueue(SongQueue.load(this.songs)));
         this.stateLoaded = true;
-        bloc.add(const SplashScreenEvent.naviagteToHomeScreen());
+        splashBloc.add(const SplashScreenEvent.naviagteToHomeScreen());
       });
     });
     super.initState();
@@ -116,8 +120,8 @@ class _SongListScreenState extends State<SongListScreen> {
       onSelected: (value) => setState(() {
         this._sortByField = value;
         this.songs = _isSortMode == SortMode.DESC
-            ? widget.mediaContent.getSongsSortedReversedBy(value)
-            : widget.mediaContent.getSongsSortedBy(value);
+            ? widget.mediaContent.getSongsSortedBy(value, true)
+            : widget.mediaContent.getSongsSortedBy(value, false);
         _prefs.setString(
           SongListDisplayState.sortedBy.name,
           this._sortByField.text,
@@ -214,8 +218,9 @@ class _SongListScreenState extends State<SongListScreen> {
                         : SortMode.ASC;
                     this.songs = _isSortMode == SortMode.DESC
                         ? widget.mediaContent
-                            .getSongsSortedReversedBy(_sortByField)
-                        : widget.mediaContent.getSongsSortedBy(_sortByField);
+                            .getSongsSortedBy(_sortByField, true)
+                        : widget.mediaContent
+                            .getSongsSortedBy(_sortByField, false);
                     _prefs.setString(
                       SongListDisplayState.sortMode.name,
                       this._isSortMode.text,
@@ -231,7 +236,7 @@ class _SongListScreenState extends State<SongListScreen> {
           ),
           body: SongContentMixin(
             mediaContent: widget.mediaContent,
-            queue: BlocProvider.of<PlaybackBloc>(context).state.queue,
+            songs: widget.mediaContent.songs,
             constraints: constraints,
             display: constraints.isMobile ? DisplayType.LIST : DisplayType.GRID,
           ),

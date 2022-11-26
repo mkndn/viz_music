@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:mkndn/src/shared/classes/classes.dart';
 import 'package:mkndn/src/shared/views/brightness_toggle.dart';
 
-import '../../../shared/models/album.dart';
 import '../../../shared/views/grid_view_mixin.dart';
 
 class AlbumsScreen extends StatelessWidget {
   const AlbumsScreen(
-      {required this.albums, super.key, this.axis = Axis.vertical});
+      {required this.content, super.key, this.axis = Axis.vertical});
 
   final Axis axis;
-  final List<Album> albums;
+  final MediaContent content;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class AlbumsScreen extends StatelessWidget {
               ],
             ),
             body: GridViewMixin(
-              albums: albums,
+              mediaStreamSupplier: () => content.getAlbums(),
               constraints: constraints,
             ),
           ),

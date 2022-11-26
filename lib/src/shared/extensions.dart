@@ -113,3 +113,11 @@ extension MapUtils<K, V> on Map<K, V> {
     return current;
   }
 }
+
+extension CompareNumExtended<T extends Comparable> on T? {
+  int compareNullable(T? that) {
+    if (this == null) return 1;
+    if (that == null) return -1;
+    return this!.compareTo(that);
+  }
+}

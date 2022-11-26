@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/classes/song.dart';
 import 'package:mkndn/src/shared/enums/hive_box.dart';
 import 'package:mkndn/src/shared/services/hive_services.dart';
 
@@ -13,4 +13,6 @@ class SongService extends HiveService<Song> {
   }
 
   Box<Song> getBox() => _box;
+
+  List<Song> getAllSongs() => getAllItems();
 }

@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mkndn/src/shared/typedefs.dart';
 
-import '../../../shared/models/playlist.dart';
 import '../../../shared/extensions.dart';
 import '../../../shared/views/clickable.dart';
-import '../../../shared/views/image_clipper.dart';
 import '../../../shared/views/outlined_card.dart';
 
 class HomeRecent extends StatelessWidget {
   const HomeRecent(
       {super.key, required this.playlists, this.axis = Axis.horizontal});
 
-  final List<Playlist> playlists;
+  final MapOfStringList playlists;
   final Axis axis;
 
   @override
@@ -24,7 +23,7 @@ class HomeRecent extends StatelessWidget {
           padding: const EdgeInsets.only(left: 10),
           itemCount: playlists.length,
           itemBuilder: (context, index) {
-            final playlist = playlists[index];
+            final playlistTitle = playlists.keys.elementAt(index);
             return Clickable(
               child: Padding(
                 padding: const EdgeInsets.only(right: 25),
@@ -36,24 +35,17 @@ class HomeRecent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Image.memory(playlist.cover,
-                                  fit: BoxFit.cover),
-                            ),
-                          ],
-                        ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(5, 10, 5, 0),
-                          child: buildDetails(context, playlist),
+                          child: buildDetails(context, playlistTitle),
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
-              onTap: () => GoRouter.of(context).go('/playlists/${playlist.id}'),
+              onTap: () =>
+                  GoRouter.of(context).go('/playlists/${playlistTitle}'),
             );
           },
         ),
@@ -64,11 +56,12 @@ class HomeRecent extends StatelessWidget {
         scrollDirection: axis,
         itemCount: playlists.length,
         itemBuilder: (context, index) {
-          final playlist = playlists[index];
+          final playlistTitle = playlists.keys.elementAt(index);
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: Clickable(
-              onTap: () => GoRouter.of(context).go('/playlists/${playlist.id}'),
+              onTap: () =>
+                  GoRouter.of(context).go('/playlists/${playlistTitle}'),
               child: SizedBox(
                 height: 200,
                 child: Row(
@@ -76,15 +69,11 @@ class HomeRecent extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    ClippedImage(
-                      playlist.cover,
-                      height: 200,
-                    ),
                     Expanded(
                       child: Center(
                         child: Padding(
                           padding: const EdgeInsets.all(20),
-                          child: buildDetails(context, playlist),
+                          child: buildDetails(context, playlistTitle),
                         ),
                       ),
                     ),
@@ -98,28 +87,18 @@ class HomeRecent extends StatelessWidget {
     );
   }
 
-  Widget buildDetails(BuildContext context, Playlist playlist) {
+  Widget buildDetails(BuildContext context, String playlistTitle) {
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
           child: Text(
-            playlist.title,
+            playlistTitle,
             style: context.titleSmall!.copyWith(
               fontWeight: FontWeight.bold,
             ),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
-            textAlign: TextAlign.center,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-          child: Text(
-            playlist.description,
-            overflow: TextOverflow.ellipsis,
-            style: context.labelSmall,
-            maxLines: 2,
             textAlign: TextAlign.center,
           ),
         ),

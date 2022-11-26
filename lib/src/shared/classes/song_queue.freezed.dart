@@ -21,8 +21,7 @@ SongQueue _$SongQueueFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$SongQueue {
   List<Song> get songs => throw _privateConstructorUsedError;
-  @ObjectIdConverter()
-  ObjectId? get currentPlayingId => throw _privateConstructorUsedError;
+  String? get currentPlayingTitle => throw _privateConstructorUsedError;
   SongWithProgress? get songWithProgress => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -38,7 +37,7 @@ abstract class $SongQueueCopyWith<$Res> {
   @useResult
   $Res call(
       {List<Song> songs,
-      @ObjectIdConverter() ObjectId? currentPlayingId,
+      String? currentPlayingTitle,
       SongWithProgress? songWithProgress});
 
   $SongWithProgressCopyWith<$Res>? get songWithProgress;
@@ -58,7 +57,7 @@ class _$SongQueueCopyWithImpl<$Res, $Val extends SongQueue>
   @override
   $Res call({
     Object? songs = null,
-    Object? currentPlayingId = freezed,
+    Object? currentPlayingTitle = freezed,
     Object? songWithProgress = freezed,
   }) {
     return _then(_value.copyWith(
@@ -66,10 +65,10 @@ class _$SongQueueCopyWithImpl<$Res, $Val extends SongQueue>
           ? _value.songs
           : songs // ignore: cast_nullable_to_non_nullable
               as List<Song>,
-      currentPlayingId: freezed == currentPlayingId
-          ? _value.currentPlayingId
-          : currentPlayingId // ignore: cast_nullable_to_non_nullable
-              as ObjectId?,
+      currentPlayingTitle: freezed == currentPlayingTitle
+          ? _value.currentPlayingTitle
+          : currentPlayingTitle // ignore: cast_nullable_to_non_nullable
+              as String?,
       songWithProgress: freezed == songWithProgress
           ? _value.songWithProgress
           : songWithProgress // ignore: cast_nullable_to_non_nullable
@@ -99,7 +98,7 @@ abstract class _$$_SongQueueCopyWith<$Res> implements $SongQueueCopyWith<$Res> {
   @useResult
   $Res call(
       {List<Song> songs,
-      @ObjectIdConverter() ObjectId? currentPlayingId,
+      String? currentPlayingTitle,
       SongWithProgress? songWithProgress});
 
   @override
@@ -118,7 +117,7 @@ class __$$_SongQueueCopyWithImpl<$Res>
   @override
   $Res call({
     Object? songs = null,
-    Object? currentPlayingId = freezed,
+    Object? currentPlayingTitle = freezed,
     Object? songWithProgress = freezed,
   }) {
     return _then(_$_SongQueue(
@@ -126,10 +125,10 @@ class __$$_SongQueueCopyWithImpl<$Res>
           ? _value._songs
           : songs // ignore: cast_nullable_to_non_nullable
               as List<Song>,
-      currentPlayingId: freezed == currentPlayingId
-          ? _value.currentPlayingId
-          : currentPlayingId // ignore: cast_nullable_to_non_nullable
-              as ObjectId?,
+      currentPlayingTitle: freezed == currentPlayingTitle
+          ? _value.currentPlayingTitle
+          : currentPlayingTitle // ignore: cast_nullable_to_non_nullable
+              as String?,
       songWithProgress: freezed == songWithProgress
           ? _value.songWithProgress
           : songWithProgress // ignore: cast_nullable_to_non_nullable
@@ -140,10 +139,10 @@ class __$$_SongQueueCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$_SongQueue extends _SongQueue {
+class _$_SongQueue extends _SongQueue with DiagnosticableTreeMixin {
   const _$_SongQueue(
       {required final List<Song> songs,
-      @ObjectIdConverter() this.currentPlayingId,
+      this.currentPlayingTitle,
       this.songWithProgress})
       : _songs = songs,
         super._();
@@ -159,35 +158,24 @@ class _$_SongQueue extends _SongQueue {
   }
 
   @override
-  @ObjectIdConverter()
-  final ObjectId? currentPlayingId;
+  final String? currentPlayingTitle;
   @override
   final SongWithProgress? songWithProgress;
 
   @override
-  String toString() {
-    return 'SongQueue(songs: $songs, currentPlayingId: $currentPlayingId, songWithProgress: $songWithProgress)';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'SongQueue(songs: $songs, currentPlayingTitle: $currentPlayingTitle, songWithProgress: $songWithProgress)';
   }
 
   @override
-  bool operator ==(dynamic other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$_SongQueue &&
-            const DeepCollectionEquality().equals(other._songs, _songs) &&
-            (identical(other.currentPlayingId, currentPlayingId) ||
-                other.currentPlayingId == currentPlayingId) &&
-            (identical(other.songWithProgress, songWithProgress) ||
-                other.songWithProgress == songWithProgress));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'SongQueue'))
+      ..add(DiagnosticsProperty('songs', songs))
+      ..add(DiagnosticsProperty('currentPlayingTitle', currentPlayingTitle))
+      ..add(DiagnosticsProperty('songWithProgress', songWithProgress));
   }
-
-  @JsonKey(ignore: true)
-  @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(_songs),
-      currentPlayingId,
-      songWithProgress);
 
   @JsonKey(ignore: true)
   @override
@@ -206,7 +194,7 @@ class _$_SongQueue extends _SongQueue {
 abstract class _SongQueue extends SongQueue {
   const factory _SongQueue(
       {required final List<Song> songs,
-      @ObjectIdConverter() final ObjectId? currentPlayingId,
+      final String? currentPlayingTitle,
       final SongWithProgress? songWithProgress}) = _$_SongQueue;
   const _SongQueue._() : super._();
 
@@ -216,8 +204,7 @@ abstract class _SongQueue extends SongQueue {
   @override
   List<Song> get songs;
   @override
-  @ObjectIdConverter()
-  ObjectId? get currentPlayingId;
+  String? get currentPlayingTitle;
   @override
   SongWithProgress? get songWithProgress;
   @override

@@ -2,15 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mkndn/src/shared/classes/media_content.dart';
-import 'package:mkndn/src/shared/classes/song_queue.dart';
+import 'package:mkndn/src/shared/classes/artist.dart';
 import 'package:mkndn/src/shared/enums/repeat_mode.dart';
-import 'package:mkndn/src/shared/models/artist.dart';
-import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/life_cycle_event_handler.dart';
+import 'package:mkndn/src/shared/classes/song.dart';
+import 'package:mkndn/src/shared/services/disk_state_storage_manager.dart';
 import 'package:mkndn/src/shared/state/inmemory_media_manager.dart';
 import 'package:mkndn/src/shared/typedefs.dart';
 import 'package:mkndn/src/shared/views/bottom_bar_song_overlay.dart';
-import 'package:objectid/objectid.dart';
 
 import '../classes/classes.dart';
 import '../extensions.dart';
@@ -42,10 +41,13 @@ class BottomBar extends StatelessWidget implements PreferredSizeWidget {
           repeatMode: state.repeatMode,
           preferredSize: preferredSize,
           queue: state.queue,
+          persistState: (manager) => manager.persistState(state),
+          songWithProgress: state.queue.songWithProgress,
+          progress: state.queue.songWithProgress?.progress,
           togglePlayPause: () => bloc.add(
             const PlaybackEvent.togglePlayPause(),
           ),
-          nextQueue: () => bloc.add(PlaybackEvent.nextQueue()),
+          nextQueue: () => bloc.add(PlaybackEvent.nextInQueue()),
           toggleFullPlayer: () => bloc.add(
             const PlaybackEvent.toggleFullPlayer(),
           ),
@@ -73,6 +75,9 @@ class _BottomBar extends StatefulWidget {
     required this.changeRepeatMode,
     required this.nextQueue,
     required this.volume,
+    required this.persistState,
+    this.progress,
+    this.songWithProgress,
   });
 
   final InMemoryMediaManagerState mediaManagerState;
@@ -82,20 +87,22 @@ class _BottomBar extends StatefulWidget {
   final RepeatMode repeatMode;
   final Size preferredSize;
   final SongQueue queue;
+  final SongWithProgress? songWithProgress;
+  final Duration? progress;
   final VoidCallback togglePlayPause;
   final VoidCallback toggleFullPlayer;
   final VoidCallback changeRepeatMode;
   final VoidCallback nextQueue;
+  final Consumer<DiskStateStorageManager> persistState;
   final double volume;
 
   @override
   State<_BottomBar> createState() => _BottomBarState();
 }
 
-class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
-  ObjectId? _artist;
-  Duration? _progress;
-  Song? _song;
+class _BottomBarState extends State<_BottomBar> {
+  DiskStateStorageManager stateStorageManager =
+      DiskStateStorageManager.instance();
   OverlayState? _overlayState = null;
   OverlayEntry? _fullScreenPlayerOverlay = null;
   OverlayEntry? _songlistOverlay = null;
@@ -106,11 +113,10 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
   Future<void> handleRankMedia(
     Duration currentProgress,
   ) async {
-    if (widget.queue.songWithProgress != null) {
-      if (widget.queue.songWithProgress!.progress.inMilliseconds >
-          widget.queue.songWithProgress!.song.length.inMilliseconds * 0.05) {
-        widget.mediaManagerState
-            .rankMedia(widget.queue.songWithProgress!.song.id);
+    if (widget.songWithProgress != null) {
+      if (widget.songWithProgress!.progress.inMilliseconds >
+          widget.songWithProgress!.song.length.inMilliseconds * 0.05) {
+        widget.mediaManagerState.rankMedia(widget.songWithProgress!.song.title);
         await _rankMediaStreamSubscription!.cancel();
       }
     }
@@ -180,10 +186,10 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     _info = widget.mediaManagerState.content;
-    _artist = widget.queue.songWithProgress?.song.artist;
-    _progress = widget.queue.songWithProgress?.progress;
-    _song = widget.queue.songWithProgress?.song;
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addObserver(LifeCycleEventHandler(
+        resumeCallBack: () async => {},
+        detachedCallBack: () async =>
+            widget.persistState(stateStorageManager)));
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       this._overlayState = Overlay.of(context);
       _buildSonglistOverlay(context, widget.queue, widget.preferredSize);
@@ -192,35 +198,10 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    switch (state) {
-      case AppLifecycleState.resumed:
-        //Execute the code here when user come back the app.
-        //In my case, I needed to show if user active or not,
-        break;
-      case AppLifecycleState.paused:
-        //Execute the code the when user leave the app
-        break;
-      default:
-        break;
-    }
-  }
-
-  @override
   void dispose() {
-    if (this._fullScreenPlayerOverlay != null) {
-      this._fullScreenPlayerOverlay!.remove();
-      this._fullScreenPlayerOverlay = null;
-    }
-    if (this._overlayState != null) {
-      this._overlayState!.dispose();
-      this._overlayState = null;
-    }
     if (widget.isPlaying) {
       PlaybackEvent.togglePlayPause();
     }
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -241,11 +222,13 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
           children: [
             Row(
               children: [
-                _AlbumArt(song: _song),
+                _AlbumArt(song: widget.songWithProgress?.song),
                 _SongDetails(
-                  artist:
-                      _artist != null ? _info.getArtistById(_artist!) : null,
-                  song: _song,
+                  artist: widget.songWithProgress?.song.artist != null
+                      ? _info.getArtistByTitle(
+                          widget.songWithProgress!.song.artist)
+                      : null,
+                  song: widget.songWithProgress?.song,
                 ),
               ],
             ),
@@ -268,8 +251,8 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
                   ),
                   Center(
                     child: _ProgressBar(
-                      progress: _progress,
-                      song: _song,
+                      progress: widget.progress,
+                      song: widget.songWithProgress?.song,
                     ),
                   ),
                 ],
@@ -278,7 +261,7 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
             if (constraints.isDesktop) ...[
               _VolumeBar(volume: widget.volume, isMuted: widget.isMuted),
             ],
-            if (_song != null)
+            if (widget.songWithProgress?.song != null)
               IconButton(
                 icon: const Icon(Icons.fullscreen),
                 onPressed: () {
@@ -295,13 +278,16 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
     );
   }
 
-  double get songProgress => _progress != null && _song != null
-      ? _progress!.inMilliseconds / _song!.length.inMilliseconds
-      : 0;
+  double get songProgress =>
+      widget.progress != null && widget.songWithProgress?.song != null
+          ? widget.progress!.inMilliseconds /
+              widget.songWithProgress!.song.length.inMilliseconds
+          : 0;
 
   Widget _buildMobileBar(BuildContext context, BoxConstraints constraints) {
-    final Artist? artist =
-        _song?.artist != null ? _info.getArtistById(_song!.artist) : null;
+    final Artist? artist = widget.songWithProgress?.song.artist != null
+        ? _info.getArtistByTitle(widget.songWithProgress!.song.artist)
+        : null;
     return ColoredBox(
       color: Theme.of(context).colorScheme.tertiaryContainer,
       child: SizedBox(
@@ -348,14 +334,14 @@ class _BottomBarState extends State<_BottomBar> with WidgetsBindingObserver {
                 right: 4,
                 child: Row(
                   children: [
-                    _AlbumArt(song: _song),
+                    _AlbumArt(song: widget.songWithProgress?.song),
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _song?.title ?? '',
+                          widget.songWithProgress?.song.title ?? '',
                           style: context.labelMedium,
                         ),
                         Text(
@@ -610,7 +596,7 @@ class _AlbumArt extends StatelessWidget {
         width: 70,
         height: 70,
         child: song != null
-            ? Image.memory(song!.image)
+            ? Image.memory(song!.albumCover)
             : Container(
                 color: Colors.pink[100],
               ),
@@ -725,8 +711,9 @@ class _FullScreenPlayerState extends State<_FullScreenPlayer> {
     final song = current?.song;
     final queue = state.queue;
     final repeatMode = state.repeatMode;
-    final Artist? artist =
-        song?.artist != null ? widget.info.getArtistById(song!.artist) : null;
+    final Artist? artist = song?.artist != null
+        ? widget.info.getArtistByTitle(song!.artist)
+        : null;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -738,7 +725,7 @@ class _FullScreenPlayerState extends State<_FullScreenPlayer> {
                   child: Opacity(
                     opacity: 0.3,
                     child: Image.memory(
-                      song!.image,
+                      song!.albumCover,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -766,7 +753,7 @@ class _FullScreenPlayerState extends State<_FullScreenPlayer> {
               children: [
                 SizedBox(
                   width: dimens.biggest.height * 0.2,
-                  child: ClippedImage(song.image),
+                  child: ClippedImage(song.albumCover),
                 ),
                 const SizedBox(width: 20),
                 Column(
@@ -815,7 +802,7 @@ class _FullScreenPlayerState extends State<_FullScreenPlayer> {
                   isPlaying: state.isPlaying,
                   togglePlayPause: () =>
                       bloc.add(const PlaybackEvent.togglePlayPause()),
-                  nextQueue: () => bloc.add(PlaybackEvent.nextQueue()),
+                  nextQueue: () => bloc.add(PlaybackEvent.nextInQueue()),
                   changeRepeatMode: () =>
                       bloc.add(const PlaybackEvent.changeRepeatMode()),
                   queue: queue,
@@ -870,7 +857,7 @@ class _MobilePlayer extends StatelessWidget {
     final queue = state.queue;
     final repeatMode = state.repeatMode;
     final Artist? artist = current?.song.artist != null
-        ? info.getArtistById(current!.song.artist)
+        ? info.getArtistByTitle(current!.song.artist)
         : null;
     return Stack(
       children: [
@@ -882,7 +869,7 @@ class _MobilePlayer extends StatelessWidget {
                   child: Opacity(
                     opacity: 0.3,
                     child: Image.memory(
-                      current.song.image,
+                      current.song.albumCover,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -910,7 +897,7 @@ class _MobilePlayer extends StatelessWidget {
               right: 0,
               height: dimens.biggest.height * 0.5,
               child: Image.memory(
-                current.song.image,
+                current.song.albumCover,
                 fit: BoxFit.contain,
               ),
             ),
@@ -954,7 +941,7 @@ class _MobilePlayer extends StatelessWidget {
                       isPlaying: state.isPlaying,
                       togglePlayPause: () =>
                           bloc.add(const PlaybackEvent.togglePlayPause()),
-                      nextQueue: () => bloc.add(PlaybackEvent.nextQueue()),
+                      nextQueue: () => bloc.add(PlaybackEvent.nextInQueue()),
                       changeRepeatMode: () =>
                           bloc.add(const PlaybackEvent.changeRepeatMode()),
                       queue: queue,

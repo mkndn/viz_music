@@ -46,4 +46,11 @@ class SongWithProgress with _$SongWithProgress {
 
   factory SongWithProgress.fromJson(Map<String, dynamic> json) =>
       _$SongWithProgressFromJson(json);
+
+  @override
+  bool operator ==(other) {
+    return (other is SongWithProgress) &&
+        this.progress == other.progress &&
+        this.song == other.song;
+  }
 }

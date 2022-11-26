@@ -22,7 +22,10 @@ class BottomBarSongOverlay extends StatelessWidget {
             child: Scaffold(
               body: SingleChildScrollView(
                 padding: const EdgeInsets.all(15.0),
-                child: SongListMixin(queue: queue),
+                child: SongListMixin(
+                  queueMutation: (song) => {},
+                  songStreamSupplier: () => Stream.fromIterable(queue.songs),
+                ),
               ),
             ),
           ),

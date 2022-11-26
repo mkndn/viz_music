@@ -61,7 +61,9 @@ class _MyAppState extends State<MyApp> {
                               appRouter.routeInformationProvider,
                           routerDelegate: appRouter.routerDelegate,
                           builder: (context, child) {
-                            return PlayPauseListener(child: child!);
+                            return PlayPauseListener(
+                              child: child!,
+                            );
                           },
                         ),
                       ),

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:mkndn/src/shared/classes/song_queue.dart';
 import 'package:mkndn/src/shared/enums/repeat_mode.dart';
-import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/classes/song.dart';
 import 'package:mkndn/src/shared/services/disk_state_storage_manager.dart';
 import 'package:mkndn/src/shared/state/player_state.dart';
 
@@ -24,7 +24,10 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
     }
     on<PlaybackEvent>(
       (event, emit) => event.map(
-        nextQueue: (event) => _nextQueue(event, emit),
+        initQueue: (event) => _initQueue(event, emit),
+        addToQueue: (event) => _addToQueue(event, emit),
+        nextInQueue: (event) => _nextInQueue(event, emit),
+        changeSong: (event) => _changeSong(event, emit),
         moveToInSong: (event) => _moveToInSong(event, emit),
         setVolume: (event) => _setVolume(event, emit),
         songProgress: (event) => _songProgress(event, emit),
@@ -46,7 +49,7 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
       yield _playbackUpdateInterval;
       if (state.queue.songWithProgress!.progress >=
           state.queue.songWithProgress!.song.length) {
-        add(PlaybackEvent.nextQueue());
+        add(PlaybackEvent.nextInQueue());
         break;
       }
     }
@@ -65,7 +68,9 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
 
   void _pausePlayback() {
     _player.pause();
-    _currentlyPlayingSubscription!.cancel();
+    if (_currentlyPlayingSubscription != null) {
+      _currentlyPlayingSubscription!.cancel();
+    }
   }
 
   void _resumePlayback() {
@@ -73,29 +78,50 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
         _startPlayingStream().listen(_handlePlaybackProgress);
     if (state.queue.songWithProgress?.song != null) {
       _player.play(
-        DeviceFileSource(state.queue.songWithProgress!.song.path),
+        UrlSource(state.queue.songWithProgress!.song.path),
         mode: PlayerMode.mediaPlayer,
       );
     }
   }
 
-  void _nextQueue(NextQueue event, Emitter<PlaybackState> emit) {
-    SongQueue? nextQueue = state.queue.getNext(state.repeatMode.idx);
+  void _addToQueue(AddToQueue event, Emitter<PlaybackState> emit) {
+    emit(
+      state.copyWith(
+        isPlaying: false,
+        queue: state.queue.addSong(event.song),
+      ),
+    );
+  }
+
+  void _initQueue(InitQueue event, Emitter<PlaybackState> emit) {
+    emit(
+      state.copyWith(
+        isPlaying: false,
+        queue: event.songQueue,
+      ),
+    );
+  }
+
+  void _nextInQueue(NextInQueue event, Emitter<PlaybackState> emit) {
+    Song? nextQueue = state.queue.getNext(state.repeatMode.idx);
     if (nextQueue == null) {
-      PlaybackEvent.togglePlayPause();
+      add(PlaybackEvent.togglePlayPause());
     } else {
-      _changeSong(nextQueue, emit);
+      add(PlaybackEvent.changeSong(nextQueue.title));
     }
   }
 
-  void _changeSong(SongQueue nextQueue, Emitter<PlaybackState> emit) {
+  void _changeSong(ChangeSong changeSong, Emitter<PlaybackState> emit) {
     if (_currentlyPlayingSubscription != null) {
       _currentlyPlayingSubscription!.cancel();
     }
+    Song song = state.queue.getSongByTitle(changeSong.songId);
     emit(
       state.copyWith(
         isPlaying: true,
-        queue: nextQueue,
+        queue: state.queue.copyWith(
+            songWithProgress: SongWithProgress.initial(song),
+            currentPlayingTitle: song.title),
       ),
     );
     _resumePlayback();

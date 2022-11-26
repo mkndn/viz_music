@@ -22,6 +22,10 @@ abstract class HiveService<T> {
     return getBox().keys.map((e) => getBox().get(e)).whereType<T>().toList();
   }
 
+  Map<dynamic, T> getKeyValuePairs() {
+    return getBox().toMap();
+  }
+
   List<T> getItemsByKeys(List<String> keys) {
     return getBox()
         .keys

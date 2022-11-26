@@ -1,28 +1,52 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:mkndn/src/shared/models/album.dart';
-import 'package:mkndn/src/shared/models/artist.dart';
-import 'package:mkndn/src/shared/models/playlist.dart';
-import 'package:mkndn/src/shared/models/song.dart';
+import 'package:mkndn/src/shared/classes/album.dart';
+import 'package:mkndn/src/shared/classes/artist.dart';
+import 'package:mkndn/src/shared/mixins/media_util.dart';
+import 'package:mkndn/src/shared/classes/song.dart';
 import 'package:mkndn/src/shared/enums/sorting.dart';
 import 'package:mkndn/src/shared/mixins/media_sorting.dart';
-import 'package:objectid/objectid.dart';
+import 'package:mkndn/src/shared/typedefs.dart';
 
-class MediaContent with MediaSorting {
-  final List<Song> _songs;
-  final List<Album> _albums;
-  final List<Artist> _artists;
-  final List<Playlist> _playlists;
+class MediaContent with MediaSorting, MediaUtilMixin {
+  static final MediaContent _instance = MediaContent._();
+  final List<Song> _songs = List.empty(growable: true);
+  final MapOfStringList _playlists = Map();
+  final List<Album> _albums = List.empty(growable: true);
+  final List<Artist> _artists = List.empty(growable: true);
+  bool _albumRefresh = false;
+  bool _artistRefresh = false;
 
-  MediaContent(
-      {List<Song>? songs,
-      List<Album>? albums,
-      List<Artist>? artists,
-      List<Playlist>? playlists})
-      : _songs = songs ?? List.empty(growable: true),
-        _albums = albums ?? List.empty(growable: true),
-        _artists = artists ?? List.empty(growable: true),
-        _playlists = playlists ?? List.empty(growable: true);
+  MediaContent._();
+
+  factory MediaContent.instance() => _instance;
+
+  factory MediaContent.instanceWithSong(List<Song> songs) {
+    _instance._songs.addAll(songs);
+    return _instance;
+  }
+
+  factory MediaContent.instanceWithSongAndPlaylist(
+      List<Song> songs, MapOfStringList playlists) {
+    _instance._songs.addAll(songs);
+    _instance._playlists.addAll(playlists);
+    return _instance;
+  }
+
+  @override
+  int get hashCode =>
+      this._songs.hashCode ^
+      this._albums.hashCode ^
+      this._artists.hashCode ^
+      this._playlists.hashCode;
+
+  @override
+  bool operator ==(other) =>
+      (other is MediaContent) &&
+      listEquals(this._songs, other.songs) &&
+      listEquals(this._albums, other.albums) &&
+      listEquals(this._artists, other.artists) &&
+      mapEquals(this._playlists, other.playlists);
 
   List<Song> get songs => this._songs;
 
@@ -30,217 +54,178 @@ class MediaContent with MediaSorting {
 
   List<Artist> get artists => this._artists;
 
-  List<Playlist> get playlists => this._playlists;
+  MapOfStringList get playlists => this._playlists;
 
-  bool equals(other) {
-    return (other is MediaContent) &&
-        listEquals(this._songs, other._songs) &&
-        listEquals(this._albums, other.albums) &&
-        listEquals(this._artists, other.artists) &&
-        listEquals(this._playlists, other.playlists);
-  }
+  void set albumRefresh(bool status) => this._albumRefresh = status;
 
-  void addSong(Song song) => this._songs.add(song);
+  void set artistRefresh(bool status) => this._artistRefresh = status;
 
-  void setSong(int index, Song song) => this._songs.setAll(index, [song]);
+  int getSongIndex(String songTitle) =>
+      this._songs.indexWhere((song) => song.title == songTitle);
+
+  List<String> get playlistTitles => this._playlists.keys.toList();
 
   void removeSong(Song song) => this._songs.remove(song);
 
-  List<Song> getSongsSortedBy(SongSortField sorting) {
-    return sortSongsByMixin(this._songs, sorting);
+  List<Song> getSongsSortedBy(SongSortField sorting, bool isReversed) {
+    return sortSongsByMixin(this._songs, sorting, isReversed);
   }
 
-  List<Song> getSongsSortedReversedBy(SongSortField sorting) {
-    return sortSongsByMixin(this._songs, sorting).reversed.toList();
+  Song? getSongByTitle(String songTitle) {
+    return this._songs.firstWhereOrNull((song) => song.title == songTitle);
   }
 
-  Song? getSongById(ObjectId id) {
-    return this._songs.firstWhereOrNull((element) => element.id == id);
-  }
-
-  List<Song> getSongsById(List<ObjectId> ids) {
+  List<Song> getSongsByTitles(List<String> songTitles) {
     return this
         ._songs
-        .where((element) => ids.contains(element.id))
+        .where((song) => songTitles.contains(song.title))
         .whereNotNull()
         .sorted((a, b) => a.title.compareTo(b.title))
         .toList();
   }
 
-  void removeSongById(ObjectId id) {
-    this._songs.removeWhere((element) => element.id == id);
+  void removeSongByTitle(String songTitle) {
+    this._songs.removeWhere((song) => song.title == songTitle);
   }
 
-  void removeSongsById(List<ObjectId> ids) {
-    this._songs.removeWhere((element) => ids.contains(element.id));
+  void removeSongsByTitles(List<String> songTitles) {
+    this._songs.removeWhere((song) => songTitles.contains(song.title));
   }
 
-  void addAlbum(Album album) => this._albums.add(album);
-
-  void setAlbum(int index, Album album) => this._albums.setAll(index, [album]);
-
-  void removeAlbum(Album album) => this._albums.remove(album);
-
-  List<Album> sortAlbumsBy(AlbumSortField sorting) {
-    return sortAlbumsByMixin(this._albums, sorting);
+  Stream<Song> getPlaylistSongs(String playlistTitle) async* {
+    this._playlists[playlistTitle]!.forEach((songTitle) async* {
+      yield getSongByTitle(songTitle);
+    });
   }
 
-  List<Album> sortAlbumsByReversed(AlbumSortField sorting) {
-    return sortAlbumsByMixin(this._albums, sorting).reversed.toList();
+  void addSongToPlaylist(String playlistTitle, String songTitle) =>
+      this._playlists[playlistTitle]!.add(songTitle);
+
+  void removeSongFromPlaylist(String playlistTitle, String songTitle) =>
+      this._playlists[playlistTitle]!.remove(songTitle);
+
+  void removePlaylist(String playlistTitle) {
+    this._playlists.remove(playlistTitle);
   }
 
-  Album? getAlbumById(ObjectId id) {
-    return this._albums.firstWhereOrNull((album) => album.id == id);
+  Stream<Album> getAlbums() async* {
+    if (this._albums.isNotEmpty && !this._albumRefresh) {
+      this._albums.forEach((album) async* {
+        yield album;
+      });
+    } else {
+      this.albumRefresh = false;
+      groupByAndStreamWithPersist<Song, Album>(
+          () => this._songs.groupListsBy((element) => element.album),
+          (List<Song> songs) => Album.load(songs),
+          (Album album) => this._albums.add(album));
+    }
   }
 
-  List<Album> getAlbumsById(List<ObjectId> ids) {
+  Album? getAlbumByTitle(String albumTitle) {
+    return this._albums.firstWhereOrNull((album) => album.title == albumTitle);
+  }
+
+  List<Album> getAlbumsByTitles(List<String> albumTitles) {
     return this
         ._albums
-        .where((album) => ids.contains(album.id))
-        .whereNotNull()
-        .sorted((a, b) => a.title.compareTo(b.title))
+        .where((album) => albumTitles.contains(album.title))
         .toList();
   }
 
-  void removeAlbumById(ObjectId id) {
-    this._albums.removeWhere((element) => element.id == id);
+  List<Album> sortAlbumsBy(AlbumSortField sorting, bool isReversed) {
+    return sortAlbumsByMixin(this._albums, sorting, isReversed);
   }
 
-  void removeAlbumsById(List<ObjectId> ids) {
-    this._albums.removeWhere((element) => ids.contains(element.id));
+  int getAlbumIndex(String albumTitle) =>
+      this._albums.indexWhere((album) => album.title == albumTitle);
+
+  Stream<Artist> getArtists() async* {
+    if (this._artists.isNotEmpty && !this._artistRefresh) {
+      this._artists.forEach((artist) async* {
+        yield artist;
+      });
+    } else {
+      this.artistRefresh = false;
+      groupByAndStreamWithPersist<Song, Artist>(
+          () => this._songs.groupListsBy((element) => element.artist),
+          (List<Song> songs) => Artist.load(songs),
+          (Artist artist) => this._artists.add(artist));
+    }
   }
 
-  void addArtist(Artist artist) => this._artists.add(artist);
-
-  void setArtist(int index, Artist artist) =>
-      this._artists.setAll(index, [artist]);
-
-  void removeArtist(Artist artist) => this._artists.remove(artist);
-
-  List<Artist> getArtistsSortedBy(ArtistSortField sorting) {
-    return sortArtistsByMixin(this._artists, sorting);
+  Stream<Album> getArtistAlbums(String artistTitle) async* {
+    groupByAndStreamWithFilter<Song, Album>(
+      () => this
+          ._songs
+          .where((element) => element.artist == artistTitle)
+          .toList(),
+      (List<Song> songs) => songs.groupListsBy((element) => element.album),
+      (String albumTitle, List<Song> songs) {
+        Album? filtered =
+            this._albums.firstWhereOrNull((album) => album.title == albumTitle);
+        if (filtered != null) {
+          return filtered;
+        } else {
+          Album loaded = Album.load(songs);
+          this._albums.add(loaded);
+          return loaded;
+        }
+      },
+    );
   }
 
-  List<Artist> getArtistsSortedReversedBy(ArtistSortField sorting) {
-    return sortArtistsByMixin(this._artists, sorting).reversed.toList();
-  }
-
-  Artist? getArtistById(ObjectId id) {
-    return this._artists.firstWhereOrNull((element) => element.id == id);
-  }
-
-  List<Artist> getArtistsById(List<ObjectId> ids) {
+  Artist? getArtistByTitle(String artistName) {
     return this
         ._artists
-        .where((element) => ids.contains(element.id))
-        .whereNotNull()
-        .sorted((a, b) => a.name.compareTo(b.name))
-        .toList();
+        .firstWhereOrNull((artist) => artist.name == artistName);
   }
 
-  void removeArtistById(ObjectId id) {
-    this._artists.removeWhere((element) => element.id == id);
+  List<Artist> sortArtistsBy(ArtistSortField sorting, bool isReversed) {
+    return sortArtistsByMixin(this._artists, sorting, isReversed);
   }
 
-  void removeArtistsById(List<ObjectId> ids) {
-    this._artists.removeWhere((element) => ids.contains(element.id));
-  }
-
-  void addPlaylist(Playlist playlist) => this._playlists.add(playlist);
-
-  void setPlaylist(int index, Playlist playlist) =>
-      this._playlists.setAll(index, [playlist]);
-
-  void removePlaylist(Playlist playlist) => this._playlists.remove(playlist);
-
-  List<Playlist> getPlaylistsSortedBy(PlaylistSortField sorting) {
-    return sortPlaylistsByMixin(this._playlists, sorting);
-  }
-
-  List<Playlist> getPlaylistsSortedReversedBy(PlaylistSortField sorting) {
-    return sortPlaylistsByMixin(this._playlists, sorting).reversed.toList();
-  }
-
-  Playlist? getPlaylistById(ObjectId id) {
-    return this._playlists.firstWhereOrNull((playlist) => playlist.id == id);
-  }
-
-  List<Playlist> getPlaylistsByIds(List<ObjectId> ids) {
-    return this
-        ._playlists
-        .where((playlist) => ids.contains(playlist.id))
-        .whereNotNull()
-        .sorted((a, b) => a.title.compareTo(b.title))
-        .toList();
-  }
-
-  void removePlaylistById(ObjectId id) {
-    this._playlists.removeWhere((playlist) => playlist.id == id);
-  }
-
-  void removePlaylistsById(List<ObjectId> ids) {
-    this._playlists.removeWhere((playlist) => ids.contains(playlist.id));
-  }
+  int getArtistIndex(String artistName) =>
+      this._artists.indexWhere((artist) => artist.name == artistName);
 
   List<Song> getTop5Songs() {
     return this
-        ._songs
-        .sorted((a, b) => a.listenCount.compareTo(b.listenCount))
-        .reversed
-        .toList()
+        .getSongsSortedBy(SongSortField.frequency, true)
         .slice(0, 5)
         .whereNotNull()
-        .sorted((a, b) => a.title.compareTo(b.title))
-        .toList();
+        .sorted((a, b) => a.title.compareTo(b.title));
   }
 
   List<Song> recentlyAdded() {
     return this
-        ._songs
-        .sorted((a, b) => a.dateAdded.compareTo(b.dateAdded))
-        .reversed
-        .toList()
+        .getSongsSortedBy(SongSortField.added, true)
         .slice(0, 5)
         .whereNotNull()
-        .sorted((a, b) => a.title.compareTo(b.title))
-        .toList();
+        .sorted((a, b) => a.title.compareTo(b.title));
   }
 
   List<Song> recentlyListened() {
     return this
-        ._songs
-        .where((element) => element.dateLastListened != null)
-        .sorted((a, b) => a.dateLastListened!.compareTo(b.dateLastListened!))
-        .reversed
-        .toList()
+        .getSongsSortedBy(SongSortField.listened, true)
         .slice(0, 5)
         .whereNotNull()
-        .sorted((a, b) => a.title.compareTo(b.title))
-        .toList();
+        .sorted((a, b) => a.title.compareTo(b.title));
   }
 
   List<Album> getTop5Albums() {
     return this
-        ._albums
-        .sorted((a, b) => a.listenCount.compareTo(b.listenCount))
-        .reversed
-        .toList()
-        .slice(0, 5)
+        .sortAlbumsBy(AlbumSortField.frequency, true)
+        .take(5)
         .whereNotNull()
-        .sorted((a, b) => a.title.compareTo(b.title))
-        .toList();
+        .sorted((a, b) => a.title.compareTo(b.title));
   }
 
   List<Artist> getTop5Artists() {
     return this
-        ._artists
-        .sorted((a, b) => a.listenCount.compareTo(b.listenCount))
-        .reversed
-        .toList()
-        .slice(0, 5)
+        .sortArtistsBy(ArtistSortField.listened, true)
+        .take(5)
         .whereNotNull()
-        .sorted((a, b) => a.name.compareTo(b.name))
-        .toList();
+        .sorted((a, b) => a.name.compareTo(b.name));
   }
 
   bool isLoaded() =>

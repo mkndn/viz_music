@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:objectid/objectid.dart';
 
 class DateTimeConverter extends JsonConverter<DateTime, String> {
   const DateTimeConverter();
@@ -18,30 +17,17 @@ class DateTimeConverter extends JsonConverter<DateTime, String> {
   String toJson(DateTime object) => object.toIso8601String();
 }
 
-class Uint8ListConverter extends JsonConverter<Uint8List, List<int>> {
+class Uint8ListConverter extends JsonConverter<Uint8List, String> {
   const Uint8ListConverter();
 
   @override
-  Uint8List fromJson(List<int> json) {
-    return Uint8List.fromList(json);
+  Uint8List fromJson(String json) {
+    return new Uint8List.fromList(json.codeUnits);
   }
 
   @override
-  List<int> toJson(Uint8List object) {
-    return object.toList();
-  }
-}
-
-class ObjectIdConverter extends JsonConverter<ObjectId, String> {
-  const ObjectIdConverter();
-  @override
-  ObjectId fromJson(String json) {
-    return ObjectId.fromHexString(json);
-  }
-
-  @override
-  String toJson(ObjectId object) {
-    return object.hexString;
+  String toJson(Uint8List object) {
+    return new String.fromCharCodes(object);
   }
 }
 

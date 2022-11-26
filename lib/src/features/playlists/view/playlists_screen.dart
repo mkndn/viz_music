@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:mkndn/src/shared/models/playlist.dart';
 import 'package:mkndn/src/shared/classes/text_tile_content.dart';
+import 'package:mkndn/src/shared/typedefs.dart';
 import 'package:mkndn/src/shared/views/brightness_toggle.dart';
 import 'package:mkndn/src/shared/views/text_tile_mixin.dart';
 
 class PlaylistsScreen extends StatelessWidget {
   const PlaylistsScreen({required this.playlists, super.key});
 
-  final List<Playlist> playlists;
+  final MapOfStringList playlists;
 
   @override
   Widget build(BuildContext context) {
-    List<TextTileContent> contents = playlists
-        .map((e) => TextTileContent(value: e.title, ref: e.id))
+    List<TextTileContent> contents = playlists.keys
+        .map((key) => TextTileContent(value: key, ref: key))
         .toList();
     return LayoutBuilder(
       builder: (context, constraints) {

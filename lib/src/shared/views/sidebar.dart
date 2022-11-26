@@ -1,15 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mkndn/src/shared/models/playlist.dart';
-import 'package:objectid/objectid.dart';
+import 'package:mkndn/src/shared/typedefs.dart';
 import '../extensions.dart';
 import 'image_clipper.dart';
 
 class SideBar extends StatelessWidget {
   const SideBar({required this.playlists, super.key});
 
-  final List<Playlist> playlists;
+  final MapOfStringList playlists;
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +35,11 @@ class SideBar extends StatelessWidget {
             title: const Text('Playlists'),
             onTap: () => GoRouter.of(context).go('/playlists'),
           ),
-          for (Playlist playlist in playlists)
+          for (String playlistTitle in playlists.keys)
             ListTile(
-              title: Text(playlist.title),
-              onTap: () => GoRouter.of(context).go('/playlists/${playlist.id}'),
+              title: Text(playlistTitle),
+              onTap: () =>
+                  GoRouter.of(context).go('/playlists/${playlistTitle}'),
             ),
         ],
       ),
@@ -50,7 +50,7 @@ class SideBar extends StatelessWidget {
 class PlaylistNav extends StatelessWidget {
   const PlaylistNav({required this.playlists, super.key});
 
-  final List<Playlist> playlists;
+  final MapOfStringList playlists;
 
   @override
   Widget build(BuildContext context) {
@@ -72,13 +72,11 @@ class PlaylistNav extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
               controller: ScrollController(),
               children: [
-                for (Playlist playlist in playlists)
+                for (String playlistTitle in playlists.keys)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2),
                     child: _PlaylistNavItem(
-                      image: playlist.cover,
-                      playlistId: playlist.id,
-                      title: playlist.title,
+                      playlistTitle: playlistTitle,
                     ),
                   ),
               ],
@@ -92,14 +90,12 @@ class PlaylistNav extends StatelessWidget {
 
 class _PlaylistNavItem extends StatefulWidget {
   const _PlaylistNavItem({
-    required this.image,
-    required this.playlistId,
-    required this.title,
+    required this.playlistTitle,
+    this.image,
   });
 
-  final Uint8List image;
-  final ObjectId playlistId;
-  final String title;
+  final Uint8List? image;
+  final String playlistTitle;
 
   @override
   State<_PlaylistNavItem> createState() => _PlaylistNavItemState();
@@ -112,7 +108,7 @@ class _PlaylistNavItemState extends State<_PlaylistNavItem> {
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode(debugLabel: widget.title)
+    _focusNode = FocusNode(debugLabel: widget.playlistTitle)
       ..addListener(() {
         setState(() => _isSelected = _focusNode.hasPrimaryFocus);
       });
@@ -121,9 +117,9 @@ class _PlaylistNavItemState extends State<_PlaylistNavItem> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: ClippedImage(widget.image),
+      leading: widget.image != null ? ClippedImage(widget.image!) : null,
       title: Text(
-        widget.title,
+        widget.playlistTitle,
         maxLines: 1,
         overflow: TextOverflow.clip,
         style: context.labelSmall!.copyWith(
@@ -131,7 +127,8 @@ class _PlaylistNavItemState extends State<_PlaylistNavItem> {
           decoration: _isSelected ? TextDecoration.underline : null,
         ),
       ),
-      onTap: () => GoRouter.of(context).go('/playlists/${widget.playlistId}'),
+      onTap: () =>
+          GoRouter.of(context).go('/playlists/${widget.playlistTitle}'),
       hoverColor: Theme.of(context).colorScheme.primary.withOpacity(0.04),
       selected: _isSelected,
       focusNode: _focusNode,
