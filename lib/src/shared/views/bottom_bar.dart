@@ -345,7 +345,7 @@ class _BottomBarState extends State<_BottomBar> {
                           style: context.labelMedium,
                         ),
                         Text(
-                          artist?.name ?? '',
+                          artist?.title ?? '',
                           style: context.labelSmall,
                         ),
                       ],
@@ -629,7 +629,7 @@ class _SongDetails extends StatelessWidget {
               maxLines: 1,
             ),
             Text(
-              artist != null ? artist!.name : '-',
+              artist != null ? artist!.title : '-',
               style: context.labelSmall!.copyWith(fontSize: 8),
               overflow: TextOverflow.clip,
             ),
@@ -768,7 +768,7 @@ class _FullScreenPlayerState extends State<_FullScreenPlayer> {
                       maxLines: 1,
                     ),
                     Text(
-                      artist?.name ?? '',
+                      artist?.title ?? '',
                       style: context.labelSmall!.copyWith(
                           fontSize: 20,
                           color: context.colors.onSurface.withOpacity(0.8)),
@@ -923,7 +923,7 @@ class _MobilePlayer extends StatelessWidget {
                         maxLines: 1,
                       ),
                       Text(
-                        artist?.name ?? '',
+                        artist?.title ?? '',
                         style: context.labelSmall!.copyWith(
                             fontSize: 12,
                             color: context.colors.onSurface.withOpacity(0.8)),

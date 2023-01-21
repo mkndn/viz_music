@@ -18,7 +18,7 @@ class TopSongs extends StatelessWidget {
     final PlaybackBloc bloc = BlocProvider.of<PlaybackBloc>(context);
     return LayoutBuilder(
       builder: (context, constraints) => SongListMixin(
-        queueMutation: (song) => {
+        queueMutator: (song) => {
           if (!listEquals(bloc.state.queue.songs, content.getTop5Songs()))
             {bloc.add(PlaybackEvent.addToQueue(song))}
         },
@@ -41,7 +41,7 @@ class NewReleases extends StatelessWidget {
     final PlaybackBloc bloc = BlocProvider.of<PlaybackBloc>(context);
     return LayoutBuilder(
       builder: (context, constraints) => SongListMixin(
-        queueMutation: (song) => {
+        queueMutator: (song) => {
           if (!listEquals(bloc.state.queue.songs, content.recentlyAdded()))
             {bloc.add(PlaybackEvent.addToQueue(song))}
         },

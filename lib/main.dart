@@ -28,6 +28,7 @@ void main() async {
     ..registerAdapter(SongQueueAdapter());
 
   await Hive.openBox<Song>(HiveBox.songs.key);
+  await Hive.openBox<String>(HiveBox.playlists.key);
   await Hive.openBox<dynamic>(HiveBox.state.key);
 
   if (UniversalPlatform.isDesktop) {

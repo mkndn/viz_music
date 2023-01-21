@@ -35,7 +35,7 @@ class ArtistScreen extends StatelessWidget {
               ),
               title: Expanded(
                 child: Text(
-                  '${artist?.name}',
+                  '${artist?.title}',
                   style: context.displaySmall,
                 ),
               ),
@@ -46,7 +46,7 @@ class ArtistScreen extends StatelessWidget {
                   ? const Text('No content')
                   : GridViewMixin(
                       mediaStreamSupplier: () => info.getArtistAlbums(
-                        artist.name,
+                        artist.title,
                       ),
                       constraints: constraints,
                     ),

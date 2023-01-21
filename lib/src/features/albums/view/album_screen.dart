@@ -90,7 +90,7 @@ class AlbumScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 20),
                     child: SongListMixin(
-                      queueMutation: mutateQueue,
+                      queueMutator: mutateQueue,
                       songStreamSupplier: () =>
                           Stream.fromIterable(album.songs),
                     ),

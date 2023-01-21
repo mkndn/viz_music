@@ -1,27 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mkndn/src/shared/classes/media_content.dart';
-import 'package:mkndn/src/shared/classes/song_queue.dart';
-import 'package:mkndn/src/shared/classes/song.dart';
 import 'package:mkndn/src/shared/enums/display_type.dart';
 import 'package:mkndn/src/shared/enums/sort_mode.dart';
 import 'package:mkndn/src/shared/enums/sorting.dart';
 import 'package:mkndn/src/shared/enums/state.dart';
 import 'package:mkndn/src/shared/extensions.dart';
-import 'package:mkndn/src/shared/playback/bloc/playback_bloc.dart';
 import 'package:mkndn/src/shared/providers/preferences.dart';
 import 'package:mkndn/src/shared/splash/bloc/splash_screen.dart';
 import 'package:mkndn/src/shared/splash/bloc/splash_screen_bloc.dart';
+import 'package:mkndn/src/shared/state/inmemory_media_manager.dart';
 import 'package:mkndn/src/shared/views/brightness_toggle.dart';
 import 'package:mkndn/src/shared/views/search.dart';
 
 import 'song_content_mixin.dart';
 
 class SongListScreen extends StatefulWidget {
-  const SongListScreen(
-      {required this.mediaContent, super.key, this.axis = Axis.horizontal});
+  const SongListScreen({super.key, this.axis = Axis.horizontal});
 
-  final MediaContent mediaContent;
   final Axis axis;
 
   @override
@@ -29,13 +24,13 @@ class SongListScreen extends StatefulWidget {
 }
 
 class _SongListScreenState extends State<SongListScreen> {
-  late List<Song> songs;
   bool stateLoaded = false;
   bool _searching = false;
   late SortMode _isSortMode;
   late DisplayType _displayType;
   late SongSortField _sortByField;
   final Preferences _prefs = Preferences();
+  late final InMemoryMediaManagerState inMemoryMediaManagerState;
 
   Future<void> initDisplayType() async {
     String? displayTypePref =
@@ -63,14 +58,12 @@ class _SongListScreenState extends State<SongListScreen> {
 
   @override
   void initState() {
+    inMemoryMediaManagerState = InMemoryMediaManager.of(context);
     final SplashScreenBloc splashBloc =
         BlocProvider.of<SplashScreenBloc>(context);
     splashBloc.add(const SplashScreenEvent.showSplashScreen());
-    final PlaybackBloc playbackBloc = BlocProvider.of<PlaybackBloc>(context);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       initFromPrefs().whenComplete(() {
-        this.songs = widget.mediaContent.getSongsSortedBy(_sortByField, false);
-        playbackBloc.add(PlaybackEvent.initQueue(SongQueue.load(this.songs)));
         this.stateLoaded = true;
         splashBloc.add(const SplashScreenEvent.naviagteToHomeScreen());
       });
@@ -119,9 +112,6 @@ class _SongListScreenState extends State<SongListScreen> {
     return PopupMenuButton<SongSortField>(
       onSelected: (value) => setState(() {
         this._sortByField = value;
-        this.songs = _isSortMode == SortMode.DESC
-            ? widget.mediaContent.getSongsSortedBy(value, true)
-            : widget.mediaContent.getSongsSortedBy(value, false);
         _prefs.setString(
           SongListDisplayState.sortedBy.name,
           this._sortByField.text,
@@ -216,11 +206,6 @@ class _SongListScreenState extends State<SongListScreen> {
                     this._isSortMode = this._isSortMode == SortMode.ASC
                         ? SortMode.DESC
                         : SortMode.ASC;
-                    this.songs = _isSortMode == SortMode.DESC
-                        ? widget.mediaContent
-                            .getSongsSortedBy(_sortByField, true)
-                        : widget.mediaContent
-                            .getSongsSortedBy(_sortByField, false);
                     _prefs.setString(
                       SongListDisplayState.sortMode.name,
                       this._isSortMode.text,
@@ -235,8 +220,7 @@ class _SongListScreenState extends State<SongListScreen> {
             ],
           ),
           body: SongContentMixin(
-            mediaContent: widget.mediaContent,
-            songs: widget.mediaContent.songs,
+            songStreamSupplier: () => inMemoryMediaManagerState.getSongs(),
             constraints: constraints,
             display: constraints.isMobile ? DisplayType.LIST : DisplayType.GRID,
           ),

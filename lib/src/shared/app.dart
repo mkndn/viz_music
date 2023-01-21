@@ -48,7 +48,7 @@ class _MyAppState extends State<MyApp> {
                       child: InMemoryMediaManager(
                         child: MaterialApp.router(
                           debugShowCheckedModeBanner: false,
-                          title: 'Flutter Demo',
+                          title: 'Viz Demo',
                           // Add theme
                           theme: theme.light(settings.value.sourceColor),
                           // Add dark theme

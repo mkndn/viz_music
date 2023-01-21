@@ -34,16 +34,16 @@ class InMemoryMediaManagerState extends State<InMemoryMediaManager>
       DiskMediaStoreManager.instance();
   final Preferences _prefs = Preferences();
 
-  List<FileSystemEntity> getEntities(String path) => Directory(path)
+  List<FileSystemEntity> _getEntities(String path) => Directory(path)
       .listSync()
       .where((element) => element.path.endsWith(".mp3"))
       .toList();
 
-  Stream<Song> _reload() async* {
+  Stream<Song> _loadSongsFromDisk() async* {
     deSerialiseFolders(await _prefs.getStringList(FolderMode.included.text))
         .forEach((folder) async {
       List<Future<Metadata>> songMetadataList = List.empty(growable: true);
-      List<FileSystemEntity> entities = getEntities(folder.path);
+      List<FileSystemEntity> entities = _getEntities(folder.path);
       for (var element in entities) {
         songMetadataList.add(MetadataRetriever.fromFile(File(element.path)));
       }
@@ -63,26 +63,46 @@ class InMemoryMediaManagerState extends State<InMemoryMediaManager>
 
   Future<bool> areFolderConfigIntact() async {
     return areFoldersIntact(await _prefs.getStringList('Folders.included'),
-        (path) => getEntities(path).length > 0);
+        (path) => _getEntities(path).length > 0);
   }
 
-  Future<void> init() async {
+  Stream<Song> getTop5Songs() async* {
+    bool folderIntact = await areFolderConfigIntact();
+    if (content.hasContent && folderIntact) {
+      content.getTop5Songs();
+    } else {
+      _loadSongsFromDisk().take(5);
+    }
+  }
+
+  Stream<Song> recentlyAdded() async* {
+    bool folderIntact = await areFolderConfigIntact();
+    if (content.hasContent && folderIntact) {
+      content.songStream.take(5);
+    } else {
+      _loadSongsFromDisk().take(5);
+    }
+  }
+
+  Stream<Song> getTop5Artists() async* {}
+
+  Stream<Song> getSongs() async* {
     bool folderIntact = await areFolderConfigIntact();
     if (folderIntact) {
       MediaContent content = _diskMediaManager.loadData();
       if (content.hasContent) {
         update(content);
+        content.songStream;
       } else {
         resetAppData();
-
-        await _reload();
+        _loadSongsFromDisk();
       }
     }
   }
 
-  Future<void> refresh() async {
+  Stream<Song> refresh() async* {
     resetAppData();
-    await _reload();
+    _loadSongsFromDisk();
   }
 
   Future<void> resetAppData() async {

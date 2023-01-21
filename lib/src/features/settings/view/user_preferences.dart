@@ -44,28 +44,6 @@ class _UserPreferencesState extends State<UserPreferences> {
               padding: const EdgeInsets.all(15),
               child: Row(
                 children: [
-                  const Text('Rescan'),
-                  const SizedBox(
-                    width: 50,
-                  ),
-                  IconButton(
-                    onPressed: () async {
-                      bloc.add(const SplashScreenEvent.showSplashScreen());
-                      state.refresh().whenComplete(() => bloc
-                          .add(const SplashScreenEvent.naviagteToHomeScreen()));
-                    },
-                    icon: const RotatedBox(
-                      quarterTurns: 2,
-                      child: Icon(Icons.refresh_rounded),
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(15),
-              child: Row(
-                children: [
                   const Text('Reset Settings'),
                   const SizedBox(width: 50),
                   IconButton(

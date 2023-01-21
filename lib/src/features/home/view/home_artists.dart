@@ -37,12 +37,12 @@ class HomeArtists extends StatelessWidget {
   Widget buildTile(BuildContext context, Artist artist) {
     return ListTile(
       title: Text(
-        artist.name,
+        artist.title,
         maxLines: 2,
         style: context.labelLarge,
         overflow: TextOverflow.ellipsis,
       ),
-      onTap: () => GoRouter.of(context).go('/artists/${artist.name}'),
+      onTap: () => GoRouter.of(context).go('/artists/${artist.title}'),
     );
   }
 }

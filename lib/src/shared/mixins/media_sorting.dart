@@ -98,7 +98,7 @@ mixin MediaSorting {
             isReversed);
       default:
         return processReversed(
-            artists.sorted((a, b) => a.name.compareTo(b.name)), isReversed);
+            artists.sorted((a, b) => a.title.compareTo(b.title)), isReversed);
     }
   }
 }

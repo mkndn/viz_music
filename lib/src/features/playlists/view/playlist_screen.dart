@@ -59,7 +59,7 @@ class PlaylistScreen extends StatelessWidget {
                     child: SingleChildScrollView(
                       scrollDirection: Axis.vertical,
                       child: SongListMixin(
-                          queueMutation: updateQueue,
+                          queueMutator: updateQueue,
                           songStreamSupplier: () =>
                               mediaContent.getPlaylistSongs(title)),
                     ),

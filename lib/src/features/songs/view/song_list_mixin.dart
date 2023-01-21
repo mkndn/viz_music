@@ -11,10 +11,10 @@ import '../../../shared/views/views.dart';
 class SongListMixin extends StatelessWidget {
   const SongListMixin(
       {required this.songStreamSupplier,
-      required this.queueMutation,
+      required this.queueMutator,
       super.key});
 
-  final Consumer<Song> queueMutation;
+  final Consumer<Song> queueMutator;
   final Supplier<Stream<Song>> songStreamSupplier;
 
   @override
@@ -52,7 +52,7 @@ class SongListMixin extends StatelessWidget {
                 child: HoverableSongPlayButton(
                   hoverMode: HoverMode.overlay,
                   action: () {
-                    queueMutation(context);
+                    queueMutator(context);
                     bloc.add(
                       PlaybackEvent.changeSong(context.title),
                     );

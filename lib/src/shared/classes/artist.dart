@@ -2,21 +2,21 @@ import 'package:collection/collection.dart';
 import 'package:mkndn/src/shared/classes/song.dart';
 
 class Artist {
-  final String name;
+  final String title;
   final DateTime dateAdded;
   DateTime? dateLastListened;
   int listenCount;
 
   Artist({
     required this.dateAdded,
-    this.name = '',
+    this.title = '',
     this.dateLastListened = null,
     this.listenCount = 0,
   });
 
   factory Artist.load(List<Song> songs) {
     return Artist(
-      name: songs
+      title: songs
               .firstWhereOrNull((element) => element.artist.length > 0)
               ?.title ??
           '',
@@ -36,12 +36,12 @@ class Artist {
 
   @override
   bool operator ==(other) {
-    return (other is Artist) && this.name == name;
+    return (other is Artist) && this.title == title;
   }
 
   @override
   int get hashCode =>
-      this.name.hashCode ^
+      this.title.hashCode ^
       this.dateAdded.hashCode ^
       this.dateLastListened.hashCode ^
       this.listenCount.hashCode;

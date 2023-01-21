@@ -50,9 +50,15 @@ class MediaContent with MediaSorting, MediaUtilMixin {
 
   List<Song> get songs => this._songs;
 
+  Stream<Song> get songStream => Stream.fromIterable(this._songs);
+
   List<Album> get albums => this._albums;
 
+  Stream<Album> get albumStream => Stream.fromIterable(this._albums);
+
   List<Artist> get artists => this._artists;
+
+  Stream<Artist> get artistStream => Stream.fromIterable(this._artists);
 
   MapOfStringList get playlists => this._playlists;
 
@@ -178,7 +184,7 @@ class MediaContent with MediaSorting, MediaUtilMixin {
   Artist? getArtistByTitle(String artistName) {
     return this
         ._artists
-        .firstWhereOrNull((artist) => artist.name == artistName);
+        .firstWhereOrNull((artist) => artist.title == artistName);
   }
 
   List<Artist> sortArtistsBy(ArtistSortField sorting, bool isReversed) {
@@ -186,46 +192,61 @@ class MediaContent with MediaSorting, MediaUtilMixin {
   }
 
   int getArtistIndex(String artistName) =>
-      this._artists.indexWhere((artist) => artist.name == artistName);
+      this._artists.indexWhere((artist) => artist.title == artistName);
 
-  List<Song> getTop5Songs() {
-    return this
+  Stream<Song> getTop5Songs() async* {
+    this
         .getSongsSortedBy(SongSortField.frequency, true)
         .slice(0, 5)
         .whereNotNull()
-        .sorted((a, b) => a.title.compareTo(b.title));
+        .sorted((a, b) => a.title.compareTo(b.title))
+        .forEach((element) async* {
+      yield element;
+    });
   }
 
-  List<Song> recentlyAdded() {
-    return this
+  Stream<Song> recentlyAdded() async* {
+    this
         .getSongsSortedBy(SongSortField.added, true)
         .slice(0, 5)
         .whereNotNull()
-        .sorted((a, b) => a.title.compareTo(b.title));
+        .sorted((a, b) => a.title.compareTo(b.title))
+        .forEach((element) async* {
+      yield element;
+    });
   }
 
-  List<Song> recentlyListened() {
-    return this
+  Stream<Song> recentlyListened() async* {
+    this
         .getSongsSortedBy(SongSortField.listened, true)
         .slice(0, 5)
         .whereNotNull()
-        .sorted((a, b) => a.title.compareTo(b.title));
+        .sorted((a, b) => a.title.compareTo(b.title))
+        .forEach((element) async* {
+      yield element;
+    });
   }
 
-  List<Album> getTop5Albums() {
-    return this
+  Stream<Album> getTop5Albums() async* {
+    this
         .sortAlbumsBy(AlbumSortField.frequency, true)
         .take(5)
         .whereNotNull()
-        .sorted((a, b) => a.title.compareTo(b.title));
+        .sorted((a, b) => a.title.compareTo(b.title))
+        .forEach((element) async* {
+      yield element;
+    });
   }
 
-  List<Artist> getTop5Artists() {
-    return this
+  Stream<Artist> getTop5Artists() async* {
+    this
         .sortArtistsBy(ArtistSortField.listened, true)
         .take(5)
         .whereNotNull()
-        .sorted((a, b) => a.name.compareTo(b.name));
+        .sorted((a, b) => a.title.compareTo(b.title))
+        .forEach((element) async* {
+      yield element;
+    });
   }
 
   bool isLoaded() =>

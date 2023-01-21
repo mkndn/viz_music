@@ -32,15 +32,13 @@ class _HomeScreenState extends State<HomeScreen> {
     if (isFolderIntact) {
       bloc().add(const SplashScreenEvent.showSplashScreen());
       if (!widget.mediaContent.hasContent) {
-        await mediaState.init().whenComplete(() => {
-              Timer(
-                Duration(seconds: 2),
-                () => {
-                  appState.updateState(updatedState: true),
-                  bloc().add(const SplashScreenEvent.naviagteToHomeScreen()),
-                },
-              ),
-            });
+        Timer(
+          Duration(seconds: 2),
+          () => {
+            appState.updateState(updatedState: true),
+            bloc().add(const SplashScreenEvent.naviagteToHomeScreen()),
+          },
+        );
       } else {
         appState.updateState(updatedState: true);
         bloc().add(const SplashScreenEvent.naviagteToHomeScreen());
